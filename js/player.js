@@ -1,8 +1,20 @@
-var width = 3000;
-var height = 300;
-colorScale = d3.scale.ordinal(d3.schemeCategory10);
 
-var selectedPlayerList = [];
+var selectedPlayerMap = {};
+
+var containerWidth = 1300;
+var containerHeight = 300;
+
+var rectWidth = 40;
+var rectHeight = 40;
+var rectPadding = 20;
+var areaWidth = 15 * (rectWidth + rectPadding + 16);
+
+var playerBoxWidth = areaWidth;
+var playerBoxHeight = 100;
+
+var selectedBoxX = playerBoxWidth/3;
+var selectedBoxY = playerBoxHeight + 10;
+var selectedBoxWidth = 5 * (rectWidth + rectPadding + 16);
 
 function init() {
     readIn();
@@ -32,27 +44,38 @@ function dragstarted(d) {
 }
 
 function dragged(d) {
-    var t = getTranslation(d3.select(this).attr("transform"))
-    var currentX = t[0]
-    var currentY = t[1]
-    var newX = currentX + d3.event.dx
-    var newY = currentY + d3.event.dy
+    var t = getTranslation(d3.select(this).attr("transform"));
+    var currentX = t[0];
+    var currentY = t[1];
+    var newX = currentX + d3.event.dx;
+    var newY = currentY + d3.event.dy;
     d3.select(this).attr("transform", function (d, i) {
         return "translate(" + [newX, newY] + ")"
     });
 }
 
 function dragended(d) {
-    currentX = getTranslation(d3.select(this).attr("transform"))[0]
-    getFinal(d, currentX)
+    currentX = getTranslation(d3.select(this).attr("transform"))[0];
+    currentY = getTranslation(d3.select(this).attr("transform"))[1];
+    getFinal(d, currentX, currentY);
     d3.select(this).classed("active", false);
 }
 
-function getFinal(d, currentX) {
+function getFinal(d, currentX, currentY) {
+    console.log('currentX: ' + currentX)
+    console.log('currentY: ' + currentY)
+    console.log('selectedBoxX: ' + selectedBoxX)
+    console.log('selectedBoxY: ' + selectedBoxY)
+    if (currentX >= selectedBoxX - 10 &&
+        currentY >= selectedBoxY - 10 &&
+        currentX <= selectedBoxX + selectedBoxWidth + 10 &&
+        currentY <= selectedBoxY + playerBoxHeight + 10) {
+        selectedPlayerMap[d.key] = d;
+        console.log(selectedPlayerMap)
+    } else {
+        if (d.key in selectedPlayerMap) {
 
-    if (currentX >= 200) {
-        selectedPlayerList.push(d.key);
-        console.log(selectedPlayerList)
+        }
     }
 }
 
@@ -72,27 +95,26 @@ function data(rawdata) {
         .on("dragend", dragended);
 
     var area = d3.select('#player_select').append('svg')
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", containerWidth)
+        .attr("height", containerHeight);
 
     var container = area.append("g");
 
-    var rectWidth = 40;
-    var rectPadding = 20;
-
-    container.append("rect")
-        .attr("x", rectWidth)
-        .attr("y", 150)
-        .attr("width", 720)
-        .attr("height", 80)
-        .attr("stroke", "black")
-        .attr("fill", "none");
-
+    // player box
     container.append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", 1500)
-        .attr("height", 100)
+        .attr("width", playerBoxWidth)
+        .attr("height", playerBoxHeight)
+        .attr("stroke", "black")
+        .attr("fill", "none");
+
+    // selection box
+    container.append("rect")
+        .attr("x", selectedBoxX)
+        .attr("y", selectedBoxY)
+        .attr("width", selectedBoxWidth)
+        .attr("height", playerBoxHeight)
         .attr("stroke", "black")
         .attr("fill", "none");
 
@@ -100,10 +122,10 @@ function data(rawdata) {
         .data(playerData)
         .enter()
         .append("g")
-        .attr("class", "bar")
+        .attr("class", "player-box")
         .attr("transform", function (d, i) {
             xVal = i * rectWidth + rectPadding;
-            yVal = 0;
+            yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
         .call(drag);
@@ -112,16 +134,16 @@ function data(rawdata) {
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
         })
-        .attr("y", 30)
-        .attr("width", 40)
-        .attr("height", 40)
-        .attr("fill", colorScale(1));
+        .attr("y", 0)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("fill", "royalblue");
 
     playerBox.append("text")
-      .text(function(d){return d.key;})
+      .text(function(d){ return d.key; })
       .attr("text-anchor", "middle")
-      .attr("x", function(d,i){return (rectPadding + (rectWidth * i))})
-      .attr("y", 80)
+      .attr("x", function(d,i){return 20 + (rectPadding + (rectWidth * i))})
+      .attr("y", 60)
       .attr("font-family", "sans-serif");
 }
 
@@ -187,7 +209,7 @@ function drawRadialBarChart() {
             .style("fill", function (d) { return color(d.name); })
             .attr("d", arc);
 
-        segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*100;})
+        segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
                 var i = d3.interpolate(d.outerRadius, barScale(+d.value));
                 return function(t) { d.outerRadius = i(t); return arc(d,index); };
@@ -200,13 +222,13 @@ function drawRadialBarChart() {
         //     .style("stroke", "black")
         //     .style("stroke-width","1.5px");
 
-        // var lines = svg.selectAll("line")
-        //     .data(keys)
-        //     .enter().append("line")
-        //     .attr("y2", -barHeight - 20)
-        //     .style("stroke", "black")
-        //     .style("stroke-width",".5px")
-        //     .attr("transform", function(d, i) { return "rotate(" + (i * 360 / numBars) + ")"; });
+        var lines = svg.selectAll("line")
+            .data(keys)
+            .enter().append("line")
+            .attr("y2", -barHeight - 20)
+            .style("stroke", "black")
+            .style("stroke-width",".5px")
+            .attr("transform", function(d, i) { return "rotate(" + (i * 360 / numBars) + ")"; });
 
         svg.append("g")
             .attr("class", "x axis")

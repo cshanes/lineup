@@ -7,3 +7,7 @@
 .boxed {
   border: 1px solid black ;
 }
+
+.player-box {
+  font-size: 10px;
+}
