@@ -2,7 +2,7 @@
 var selectedPlayerMap = {};
 
 var containerWidth = 1300;
-var containerHeight = 300;
+var containerHeight = 120;
 
 var rectWidth = 40;
 var rectHeight = 40;
@@ -12,87 +12,30 @@ var areaWidth = 15 * (rectWidth + rectPadding + 16);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
-var selectedBoxX = playerBoxWidth/3;
-var selectedBoxY = playerBoxHeight + 10;
-var selectedBoxWidth = 5 * (rectWidth + rectPadding + 16);
-
-function init() {
-    readIn();
-    drawRadialBarChart();
-}
-
-function getTranslation(transform) {
-    // Create a dummy g for calculation purposes only. This will never
-    // be appended to the DOM and will be discarded once this function
-    // returns.
-    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-    // Set the transform attribute to the provided string value.
-    g.setAttributeNS(null, "transform", transform);
-
-    // consolidate the SVGTransformList containing all transformations
-    // to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
-    // its SVGMatrix.
-    var matrix = g.transform.baseVal.consolidate().matrix;
-
-    // As per definition values e and f are the ones for the translation.
-    return [matrix.e, matrix.f];
-}
-
-function dragstarted(d) {
-    // d3.select(this).raise().classed("active", true);
-}
-
-function dragged(d) {
-    var t = getTranslation(d3.select(this).attr("transform"));
-    var currentX = t[0];
-    var currentY = t[1];
-    var newX = currentX + d3.event.dx;
-    var newY = currentY + d3.event.dy;
-    d3.select(this).attr("transform", function (d, i) {
-        return "translate(" + [newX, newY] + ")"
-    });
-}
-
-function dragended(d) {
-    currentX = getTranslation(d3.select(this).attr("transform"))[0];
-    currentY = getTranslation(d3.select(this).attr("transform"))[1];
-    getFinal(d, currentX, currentY);
-    d3.select(this).classed("active", false);
-}
-
-function getFinal(d, currentX, currentY) {
-    console.log('currentX: ' + currentX)
-    console.log('currentY: ' + currentY)
-    console.log('selectedBoxX: ' + selectedBoxX)
-    console.log('selectedBoxY: ' + selectedBoxY)
-    if (currentX >= selectedBoxX - 10 &&
-        currentY >= selectedBoxY - 10 &&
-        currentX <= selectedBoxX + selectedBoxWidth + 10 &&
-        currentY <= selectedBoxY + playerBoxHeight + 10) {
-        selectedPlayerMap[d.key] = d;
-        console.log(selectedPlayerMap)
-    } else {
-        if (d.key in selectedPlayerMap) {
-
-        }
+function updateData() {
+    var size = Object.keys(selectedPlayerMap).length;
+    if (size == 0) {
+        drawRadialBarChart("data/playerData.csv")
+    } else if (size == 1) {
+        drawRadialBarChart("data/twoPlayerLineups.csv")
     }
 }
 
-function readIn() {
-    d3.csv('data/playerData.csv', data);
+function init() {
+    readIn();
+    drawRadialBarChart("data/playerData.csv");
 }
-function data(rawdata) {
-    playerData = d3.nest()
+
+function readIn() {
+    d3.csv('data/playerData.csv', drawPlayerSelectionBox);
+}
+
+function drawPlayerSelectionBox(rawdata) {
+    var playerData = d3.nest()
         .key(function (d) {
             return (d.abrev_name);
         })
         .entries(rawdata);
-
-    var drag = d3.behavior.drag()
-        .on("dragstart", dragstarted)
-        .on("drag", dragged)
-        .on("dragend", dragended);
 
     var area = d3.select('#player_select').append('svg')
         .attr("width", containerWidth)
@@ -109,16 +52,7 @@ function data(rawdata) {
         .attr("stroke", "black")
         .attr("fill", "none");
 
-    // selection box
-    container.append("rect")
-        .attr("x", selectedBoxX)
-        .attr("y", selectedBoxY)
-        .attr("width", selectedBoxWidth)
-        .attr("height", playerBoxHeight)
-        .attr("stroke", "black")
-        .attr("fill", "none");
-
-    var playerBox = area.selectAll('.bar')
+    var playerContainers = area.selectAll('.bar')
         .data(playerData)
         .enter()
         .append("g")
@@ -128,9 +62,18 @@ function data(rawdata) {
             yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
-        .call(drag);
+        .on("click", function(d) {
+            if (d.key in selectedPlayerMap) {
+                delete selectedPlayerMap[d.key];
+            } else {
+                selectedPlayerMap[d.key] = d.values[0]
+                //TODO: set class of box to be highlighted
+            }
+            console.log(selectedPlayerMap);
+            updateData();
+        });
 
-    playerBox.append("rect")
+    playerContainers.append("rect")
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
         })
@@ -139,7 +82,7 @@ function data(rawdata) {
         .attr("height", rectHeight)
         .attr("fill", "royalblue");
 
-    playerBox.append("text")
+    playerContainers.append("text")
       .text(function(d){ return d.key; })
       .attr("text-anchor", "middle")
       .attr("x", function(d,i){return 20 + (rectPadding + (rectWidth * i))})
@@ -147,7 +90,7 @@ function data(rawdata) {
       .attr("font-family", "sans-serif");
 }
 
-function drawRadialBarChart() {
+function drawRadialBarChart(csv_path) {
     var width = 960,
         height = 500,
         barHeight = height / 2 - 40;
@@ -157,26 +100,42 @@ function drawRadialBarChart() {
     var color = d3.scale.ordinal()
         .range(["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"]);
 
+    d3.select('#chart').selectAll('*').remove();
+
     var svg = d3.select('#chart').append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
         .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
 
-    d3.csv("data/playerData.csv", function(error, data) {
+    d3.csv(csv_path, function(error, data) {
 
         data.map(function(d) {
-            return d['value'] = +d['value'];
-        })
+            return d['rating'] = +d['rating'];
+        });
 
-        data.sort(function(a,b) { return b.value - a.value; });
+        //remove data rows that do not include currently selected players
+        var numSelected = Object.keys(selectedPlayerMap).length;
+        if (numSelected > 0) {
+            data = data.filter(function(d) {
+                for (var i = 0; i < numSelected; i++) {
+                    var columnName = 'player' + parseInt(i)
+                    var playerName = d[columnName]
+                    if (playerName in selectedPlayerMap) {
+                        return true;
+                    }
+                }
+            })
+        }
 
-        var extent = d3.extent(data, function(d) { return d.value; });
+        data.sort(function(a,b) { return b.rating - a.rating; });
+
+        var extent = d3.extent(data, function(d) { return d.rating; });
         var barScale = d3.scale.linear()
             .domain(extent)
             .range([0, barHeight]);
 
-        var keys = data.map(function(d,i) { return d.abrev_name; });
+        var keys = data.map(function(d,i) { return d.rating; });
         var numBars = keys.length;
 
         var x = d3.scale.linear()
@@ -211,7 +170,7 @@ function drawRadialBarChart() {
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
-                var i = d3.interpolate(d.outerRadius, barScale(+d.value));
+                var i = d3.interpolate(d.outerRadius, barScale(+d.rating));
                 return function(t) { d.outerRadius = i(t); return arc(d,index); };
             });
 
@@ -246,7 +205,7 @@ function drawRadialBarChart() {
             .attr("d", "m0 " + -labelRadius + " a" + labelRadius + " " + labelRadius + " 0 1,1 -0.01 0");
 
         labels.selectAll("text")
-            .data(keys)
+            .data(data)
             .enter().append("text")
             .style("text-anchor", "middle")
             .style("font-weight","bold")
@@ -254,8 +213,8 @@ function drawRadialBarChart() {
             .append("textPath")
             .attr("xlink:href", "#label-path")
             .attr("startOffset", function(d, i) {return i * 100 / numBars + 50 / numBars + '%';})
-            .text(function(d) {
-                return d.toUpperCase();
+            .text(function(d, i) {
+                return parseInt(i);
             });
     });
 }
