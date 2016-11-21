@@ -14,20 +14,43 @@ var playerBoxHeight = 100;
 
 function updateData() {
     var size = Object.keys(selectedPlayerMap).length;
+    var filename;
     if (size == 0) {
-        drawRadialBarChart("data/playerData.csv")
+        filename = "data/playerData.csv";
     } else if (size == 1) {
-        drawRadialBarChart("data/twoPlayerLineups.csv")
+        filename = "data/twoPlayerLineups.csv";
     }
+
+    drawRadialBarChart(filename);
+    drawScatterPlot(filename);
 }
 
 function init() {
     readIn();
-    drawRadialBarChart("data/playerData.csv");
+    updateData();
 }
 
 function readIn() {
     d3.csv('data/playerData.csv', drawPlayerSelectionBox);
+}
+
+//remove data rows that do not include currently selected players
+function removeNonSelectedPlayers(data) {
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var result = data;
+    if (numSelected > 0) {
+        //TODO: This logic will need to be modified for player groups that are > 2
+        result = data.filter(function(d) {
+            for (var i = 0; i < numSelected; i++) {
+                var columnName = 'player' + parseInt(i)
+                var playerName = d[columnName]
+                if (playerName in selectedPlayerMap) {
+                    return true;
+                }
+            }
+        })
+    }
+    return result;
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -114,19 +137,7 @@ function drawRadialBarChart(csv_path) {
             return d['rating'] = +d['rating'];
         });
 
-        //remove data rows that do not include currently selected players
-        var numSelected = Object.keys(selectedPlayerMap).length;
-        if (numSelected > 0) {
-            data = data.filter(function(d) {
-                for (var i = 0; i < numSelected; i++) {
-                    var columnName = 'player' + parseInt(i)
-                    var playerName = d[columnName]
-                    if (playerName in selectedPlayerMap) {
-                        return true;
-                    }
-                }
-            })
-        }
+        data = removeNonSelectedPlayers(data);
 
         data.sort(function(a,b) { return b.rating - a.rating; });
 
@@ -216,5 +227,93 @@ function drawRadialBarChart(csv_path) {
             .text(function(d, i) {
                 return parseInt(i);
             });
+    });
+}
+
+function drawScatterPlot(csv_path) {
+    var width = 960,
+        height = 500
+
+    d3.select('#scatterplot').selectAll('*').remove();
+
+    var svg = d3.select('#scatterplot').append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g");
+
+    d3.csv(csv_path, function(error, data) {
+        data.map(function(d) {
+            return d['rating'] = +d['rating'];
+        });
+
+        data = removeNonSelectedPlayers(data);
+
+        data.sort(function(a,b) { return b.rating - a.rating; });
+
+        // setup x
+        var xValue = function(d) { return d.rating ;}, // data -> value
+            xScale = d3.scale.linear().range([0, width]), // value -> display
+            xMap = function(d) { return xScale(xValue(d));}, // data -> display
+            xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+        // setup y
+        var yValue = function(d) { return d.rating;}, // data -> value
+            yScale = d3.scale.linear().range([height, 0]), // value -> display
+            yMap = function(d) { return yScale(yValue(d));}, // data -> display
+            yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+        // don't want dots overlapping axis, so add in buffer to data domain
+        xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+        yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+        // x-axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("Defensive Efficiency");
+
+        // y-axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Offensive Efficiency");
+
+        // draw dots
+        svg.selectAll(".dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("class", "dot")
+            .attr("r", 3.5)
+            .attr("cx", xMap)
+            .attr("cy", yMap)
+            .style("fill", function(d) { return 'steelblue';})
+            .on("mouseover", function(d) {
+                // tooltip.transition()
+                //     .duration(200)
+                //     .style("opacity", .9);
+                // tooltip.html(d["Cereal Name"] + "<br/> (" + xValue(d)
+                //     + ", " + yValue(d) + ")")
+                //     .style("left", (d3.event.pageX + 5) + "px")
+                //     .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                // tooltip.transition()
+                //     .duration(500)
+                //     .style("opacity", 0);
+            });
+
+
     });
 }
