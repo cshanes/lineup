@@ -88,9 +88,10 @@ function drawPlayerSelectionBox(rawdata) {
         .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
+                d3.select(this).selectAll('rect').classed("selected", false)
             } else {
                 selectedPlayerMap[d.key] = d.values[0]
-                //TODO: set class of box to be highlighted
+                d3.select(this).selectAll('rect').classed("selected", true)
             }
             console.log(selectedPlayerMap);
             updateData();

@@ -11,3 +11,8 @@
 .player-box {
   font-size: 10px;
 }
+
+.selected {
+  stroke: #00ff9f;
+  stroke-width: 3px;
+}
