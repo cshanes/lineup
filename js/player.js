@@ -16,7 +16,7 @@ function updateData() {
     var size = Object.keys(selectedPlayerMap).length;
     var filename;
     if (size == 0) {
-        filename = "data/playerData.csv";
+        filename = "data/singlePlayerData.csv";
     } else if (size == 1) {
         filename = "data/twoPlayerLineups.csv";
     }
@@ -31,7 +31,7 @@ function init() {
 }
 
 function readIn() {
-    d3.csv('data/playerData.csv', drawPlayerSelectionBox);
+    d3.csv('data/singlePlayerData.csv', drawPlayerSelectionBox);
 }
 
 //remove data rows that do not include currently selected players
@@ -42,8 +42,8 @@ function removeNonSelectedPlayers(data) {
         //TODO: This logic will need to be modified for player groups that are > 2
         result = data.filter(function(d) {
             for (var i = 0; i < numSelected; i++) {
-                var columnName = 'player' + parseInt(i)
-                var playerName = d[columnName]
+                var columnName = 'player' + parseInt(i);
+                var playerName = d[columnName];
                 if (playerName in selectedPlayerMap) {
                     return true;
                 }
@@ -135,19 +135,21 @@ function drawRadialBarChart(csv_path) {
     d3.csv(csv_path, function(error, data) {
 
         data.map(function(d) {
-            return d['rating'] = +d['rating'];
+            return d['off_rating'] = +d['off_rating'];
         });
 
         data = removeNonSelectedPlayers(data);
 
-        data.sort(function(a,b) { return b.rating - a.rating; });
+        data.sort(function(a,b) { return b.off_rating - a.off_rating; });
 
-        var extent = d3.extent(data, function(d) { return d.rating; });
+        var extent = d3.extent(data, function(d) {
+            return d.off_rating;
+        });
         var barScale = d3.scale.linear()
             .domain(extent)
             .range([0, barHeight]);
 
-        var keys = data.map(function(d,i) { return d.rating; });
+        var keys = data.map(function(d,i) { return d.off_rating; });
         var numBars = keys.length;
 
         var x = d3.scale.linear()
@@ -182,7 +184,7 @@ function drawRadialBarChart(csv_path) {
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
-                var i = d3.interpolate(d.outerRadius, barScale(+d.rating));
+                var i = d3.interpolate(d.outerRadius, barScale(+d.off_rating));
                 return function(t) { d.outerRadius = i(t); return arc(d,index); };
             });
 
@@ -244,21 +246,20 @@ function drawScatterPlot(csv_path) {
 
     d3.csv(csv_path, function(error, data) {
         data.map(function(d) {
-            return d['rating'] = +d['rating'];
+            return d['off_rating'] = +d['off_rating'];
+            return d['def_rating'] = +d['def_rating'];
         });
 
         data = removeNonSelectedPlayers(data);
 
-        data.sort(function(a,b) { return b.rating - a.rating; });
-
         // setup x
-        var xValue = function(d) { return d.rating ;}, // data -> value
+        var xValue = function(d) { return d.def_rating ;}, // data -> value
             xScale = d3.scale.linear().range([0, width]), // value -> display
             xMap = function(d) { return xScale(xValue(d));}, // data -> display
             xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
         // setup y
-        var yValue = function(d) { return d.rating;}, // data -> value
+        var yValue = function(d) { return d.off_rating;}, // data -> value
             yScale = d3.scale.linear().range([height, 0]), // value -> display
             yMap = function(d) { return yScale(yValue(d));}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left");
