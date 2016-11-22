@@ -12,6 +12,7 @@ var areaWidth = 15 * (rectWidth + rectPadding + 16);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
+
 function updateData() {
     var size = Object.keys(selectedPlayerMap).length;
     var filename;
@@ -70,7 +71,7 @@ function drawPlayerSelectionBox(rawdata) {
     container.append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", playerBoxWidth)
+        .attr("width", playerBoxWidth+100)
         .attr("height", playerBoxHeight)
         .attr("stroke", "black")
         .attr("fill", "none");
@@ -235,10 +236,13 @@ function drawRadialBarChart(csv_path) {
 
 function drawScatterPlot(csv_path) {
     var width = 960,
-        height = 500
-
+        xWidth = 900,
+        height = 600,
+        yHeight = 25,
+        xHeight = 580;
+    var tooltip;
     d3.select('#scatterplot').selectAll('*').remove();
-
+    
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -246,17 +250,17 @@ function drawScatterPlot(csv_path) {
 
     d3.csv(csv_path, function(error, data) {
         data.map(function(d) {
-            return d['off_rating'] = +d['off_rating'];
-            return d['def_rating'] = +d['def_rating'];
+            return d['off_rating'] = +d['off_rating'],
+               d['def_rating'] = +d['def_rating'];
         });
 
         data = removeNonSelectedPlayers(data);
-
+        
         // setup x
         var xValue = function(d) { return d.def_rating ;}, // data -> value
-            xScale = d3.scale.linear().range([0, width]), // value -> display
-            xMap = function(d) { return xScale(xValue(d));}, // data -> display
-            xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+            xScale = d3.scale.linear().range([0, xWidth]), // value -> display
+            xMap = function(d) {return xScale(xValue(d));}, // data -> display
+            xAxis = d3.svg.axis().orient("bottom").scale(xScale);
 
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
@@ -271,18 +275,19 @@ function drawScatterPlot(csv_path) {
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate("+yHeight+"," + xHeight + ")")
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width)
-            .attr("y", -6)
+            .attr("x", xWidth)
+            .attr("y", -20)
             .style("text-anchor", "end")
             .text("Defensive Efficiency");
 
         // y-axis
         svg.append("g")
             .attr("class", "y axis")
+            .attr("transform", "translate("+yHeight+","+-20+")")
             .call(yAxis)
             .append("text")
             .attr("class", "label")
@@ -297,24 +302,24 @@ function drawScatterPlot(csv_path) {
             .data(data)
             .enter().append("circle")
             .attr("class", "dot")
-            .attr("r", 3.5)
+            .attr("r", 5) //make dynamic with number of posessions
             .attr("cx", xMap)
             .attr("cy", yMap)
-            .style("fill", function(d) { return 'steelblue';})
+            .style("fill", 'steelblue') //make dynamic with score
             .on("mouseover", function(d) {
-                // tooltip.transition()
-                //     .duration(200)
-                //     .style("opacity", .9);
-                // tooltip.html(d["Cereal Name"] + "<br/> (" + xValue(d)
-                //     + ", " + yValue(d) + ")")
-                //     .style("left", (d3.event.pageX + 5) + "px")
-                //     .style("top", (d3.event.pageY - 28) + "px");
+                 tooltip.transition()
+                     .duration(200)
+                     .style("opacity", 0.9);
+                 tooltip.html("test")
+                     .style("left", (d3.this.x) + "px")
+                     .style("top", (d3.this.y) + "px");
             })
             .on("mouseout", function(d) {
-                // tooltip.transition()
-                //     .duration(500)
-                //     .style("opacity", 0);
+                 tooltip.transition()
+                     .duration(500)
+                     .style("opacity", 0);
             });
+            
 
 
     });
