@@ -219,22 +219,8 @@ function drawPlayerSelectionBox(rawdata) {
             yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
-<<<<<<< HEAD
-        .on("click", function(d) {
-            if (d.key in selectedPlayerMap) {
-                delete selectedPlayerMap[d.key];
-                d3.select(this).selectAll('rect').classed("selected", false)
-            } else {
-                selectedPlayerMap[d.key] = d.values[0]
-                d3.select(this).selectAll('rect').classed("selected", true)
-            }
-            console.log(selectedPlayerMap);
-            updateData();
-        });
-=======
         .on("click", mouseClickPlayerBox);
 
->>>>>>> origin/master
     playerContainers.append("rect")
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
@@ -516,18 +502,13 @@ function drawTable(data) {
 }
 
 function drawScatterPlot(csv_path) {
-<<<<<<< HEAD
-    var width = 960,
-        xWidth = 900,
-        height = 600,
+    var xWidth = 900,
         yHeight = 25,
         xHeight = 580;
     var tooltip;
-=======
     var width = 400,
         height = 400
 
->>>>>>> origin/master
     d3.select('#scatterplot').selectAll('*').remove();
     var tooltip = d3.select("#scatterplot").append("div")
       .attr("class", "tooltip")
@@ -599,14 +580,15 @@ function drawScatterPlot(csv_path) {
                      .duration(200)
                      .style("opacity", 1);
                  tooltip.html(d["playername"]+ "<br/> (Defensive Efficiency: " + d["def_rating"] 
-	        + ", Offensive Efficiency: " + d["off_rating"] + ")")
-                  .style("left", (d3.event.pageX + 5) + "px")		
-                  .style("top", (d3.event.pageY - 28) + "px");	
-            })	
+                     + ", Offensive Efficiency: " + d["off_rating"] + ")")
+                     .style("left", (d3.event.pageX + 5) + "px")
+                     .style("top", (d3.event.pageY - 28) + "px");
             })
             .on("mouseout", function(d) {
-                 tooltip.transition()
-                     .duration(500)
-                     .style("opacity", 0);
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
             });
+    })
+
 }
