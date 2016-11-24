@@ -71,7 +71,7 @@ function drawPlayerSelectionBox(rawdata) {
     container.append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", playerBoxWidth+100)
+        .attr("width", playerBoxWidth)
         .attr("height", playerBoxHeight)
         .attr("stroke", "black")
         .attr("fill", "none");
@@ -97,7 +97,6 @@ function drawPlayerSelectionBox(rawdata) {
             console.log(selectedPlayerMap);
             updateData();
         });
-
     playerContainers.append("rect")
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
@@ -242,7 +241,9 @@ function drawScatterPlot(csv_path) {
         xHeight = 580;
     var tooltip;
     d3.select('#scatterplot').selectAll('*').remove();
-    
+    var tooltip = d3.select("#scatterplot").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -255,7 +256,6 @@ function drawScatterPlot(csv_path) {
         });
 
         data = removeNonSelectedPlayers(data);
-        
         // setup x
         var xValue = function(d) { return d.def_rating ;}, // data -> value
             xScale = d3.scale.linear().range([0, xWidth]), // value -> display
@@ -309,18 +309,16 @@ function drawScatterPlot(csv_path) {
             .on("mouseover", function(d) {
                  tooltip.transition()
                      .duration(200)
-                     .style("opacity", 0.9);
-                 tooltip.html("test")
-                     .style("left", (d3.this.x) + "px")
-                     .style("top", (d3.this.y) + "px");
+                     .style("opacity", 1);
+                 tooltip.html(d["playername"]+ "<br/> (Defensive Efficiency: " + d["def_rating"] 
+	        + ", Offensive Efficiency: " + d["off_rating"] + ")")
+                  .style("left", (d3.event.pageX + 5) + "px")		
+                  .style("top", (d3.event.pageY - 28) + "px");	
+            })	
             })
             .on("mouseout", function(d) {
                  tooltip.transition()
                      .duration(500)
                      .style("opacity", 0);
             });
-            
-
-
-    });
 }
