@@ -17,27 +17,31 @@ var playerBoxHeight = 100;
 
 function updateData() {
     var size = Object.keys(selectedPlayerMap).length;
-    var filename;
-    if (size == 0) {
-        filename = "data/fivePlayerLineups.csv";
-    } else if (size == 1) {
+    var filename = "data/fivePlayerLineups.csv";
+    var currentLineupFile = "data/fivePlayerLineups.csv";
+    if (size == 1) {
+        currentLineupFile = "data/singlePlayerData.csv";
         filename = "data/twoPlayerLineups.csv";
     } else if (size == 2) {
+        currentLineupFile = "data/twoPlayerLineups.csv";
         filename = "data/threePlayerLineups.csv";
     } else if (size == 3) {
+        currentLineupFile = "data/threePlayerLineups.csv";
         filename = "data/fourPlayerLineups.csv";
     } else if (size == 4) {
+        currentLineupFile = "data/fourPlayerLineups.csv";
         filename = "data/fivePlayerLineups.csv";
     }
 
-    d3.csv(filename, function(d) {
+    d3.csv(currentLineupFile, function(d) {
         currentLineupData = d;
+        setCurrentLineup();
+
+        drawRadialBarChart(filename);
+        drawScatterPlot(filename);
+        drawTable(null);
     })
 
-    setCurrentLineup();
-    drawRadialBarChart(filename);
-    drawScatterPlot(filename);
-    drawTable(null);
 }
 
 function init() {
@@ -100,9 +104,8 @@ function setCurrentLineup() {
         var row = currentLineupData[i];
         var rowPlayerNames = {}
         for (var j = 0; j < numSelected; j++) {
-            var curRow = currentLineupData[j];
             var columnName = 'player' + parseInt(j);
-            var playerName = curRow[columnName];
+            var playerName = row[columnName];
             rowPlayerNames[playerName] = true
         }
         var allPlayersInRow = true;
@@ -116,6 +119,7 @@ function setCurrentLineup() {
             continue;
         }
         currentLineup = row;
+        return;
     }
 }
 
@@ -187,7 +191,7 @@ function mouseOverPlayerArc(d) {
 function drawPlayerSelectionBox(rawdata) {
     var playerData = d3.nest()
         .key(function (d) {
-            return (d.abrev_name);
+            return (d.player0);
         })
         .entries(rawdata);
 
