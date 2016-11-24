@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <title>Drag-n-drop Players</title>
   <script src="lib/d3.v3.js"></script>
-
+  <script src="lib/d3-jetpack.js"></script>
   <script src="lib/radialBarChart.js"></script>
   <script src="js/player.js"></script>
   <link href="css/main.css" rel="stylesheet">
@@ -16,8 +16,11 @@
     <label for="currentPlayers">Select Your Players To Create a Lineup </label>
   </div>
   <div id="player_select"></div>
-  <div id="chart"></div>
-  <div id="scatterplot"></div>
+  <div class="row">
+    <div id="chart" class="col-md-4"></div>
+    <div id="table" class="col-md-4"></div>
+    <div id="scatterplot" class="col-md-4"></div>
+  </div>
 </div>
 
 </body>

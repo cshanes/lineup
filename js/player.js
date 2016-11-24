@@ -1,5 +1,7 @@
 
 var selectedPlayerMap = {};
+var currentLineupData = [];
+var currentLineup = null;
 
 var containerWidth = 1300;
 var containerHeight = 120;
@@ -17,13 +19,25 @@ function updateData() {
     var size = Object.keys(selectedPlayerMap).length;
     var filename;
     if (size == 0) {
-        filename = "data/singlePlayerData.csv";
+        filename = "data/fivePlayerLineups.csv";
     } else if (size == 1) {
         filename = "data/twoPlayerLineups.csv";
+    } else if (size == 2) {
+        filename = "data/threePlayerLineups.csv";
+    } else if (size == 3) {
+        filename = "data/fourPlayerLineups.csv";
+    } else if (size == 4) {
+        filename = "data/fivePlayerLineups.csv";
     }
 
+    d3.csv(filename, function(d) {
+        currentLineupData = d;
+    })
+
+    setCurrentLineup();
     drawRadialBarChart(filename);
     drawScatterPlot(filename);
+    drawTable(null);
 }
 
 function init() {
@@ -39,19 +53,135 @@ function readIn() {
 function removeNonSelectedPlayers(data) {
     var numSelected = Object.keys(selectedPlayerMap).length;
     var result = data;
-    if (numSelected > 0) {
-        //TODO: This logic will need to be modified for player groups that are > 2
+    if (numSelected > 0 && numSelected < 5) {
         result = data.filter(function(d) {
-            for (var i = 0; i < numSelected; i++) {
+            var numInLineup = 0;
+            var nextPlayer = '';
+            for (var i = 0; i < numSelected + 1; i++) {
                 var columnName = 'player' + parseInt(i);
                 var playerName = d[columnName];
                 if (playerName in selectedPlayerMap) {
-                    return true;
+                    numInLineup++;
+                } else {
+                    nextPlayer = playerName;
                 }
+            }
+            if (numInLineup == numSelected) {
+                d.nextPlayer = nextPlayer;
+                return true;
+            } else {
+                return false;
             }
         })
     }
     return result;
+}
+
+function getNonSelectedPlayerName(data, i) {
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var result = parseInt(i);
+    if (numSelected > 0 && numSelected < 5) {
+        for (var j = 0; j < numSelected + 1; j++) {
+            var columnName = 'player' + parseInt(j);
+            var playerName = data[columnName];
+            if (!(playerName in selectedPlayerMap)) {
+                return playerName;
+            }
+        }
+    }
+
+    return result;
+}
+
+function setCurrentLineup() {
+    var numSelected = Object.keys(selectedPlayerMap).length;
+
+    for (var i = 0; i < currentLineupData.length; i++) {
+        var row = currentLineupData[i];
+        var rowPlayerNames = {}
+        for (var j = 0; j < numSelected; j++) {
+            var curRow = currentLineupData[j];
+            var columnName = 'player' + parseInt(j);
+            var playerName = curRow[columnName];
+            rowPlayerNames[playerName] = true
+        }
+        var allPlayersInRow = true;
+        for (var key in selectedPlayerMap) {
+            if (!(key in rowPlayerNames)) {
+                allPlayersInRow = false;
+            }
+        }
+
+        if (!allPlayersInRow) {
+            continue;
+        }
+        currentLineup = row;
+    }
+}
+
+function mouseClickPlayerBox(d) {
+    if (d.key in selectedPlayerMap) {
+        delete selectedPlayerMap[d.key];
+        d3.select(this).selectAll('rect').classed("selected", false)
+    } else {
+        selectedPlayerMap[d.key] = d.values[0];
+        d3.select(this).selectAll('rect').classed("selected", true)
+    }
+    console.log(selectedPlayerMap);
+    updateData();
+}
+
+function mouseClickPlayerArc(d) {
+    selectedPlayerMap[d.nextPlayer] = d;
+    var boxId = '#' + d.nextPlayer;
+    d3.select(boxId).selectAll('rect').classed("selected", true)
+    console.log(selectedPlayerMap);
+    updateData();
+}
+
+function mouseOverPlayerArc(d) {
+    data = [
+        {
+            current: null,
+            stat: 'Clinch Rating',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Effective FG%',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Rebounding Rate',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Turnover Rate',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Free Throw Rate',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Off. Efficiency',
+            new: null
+        },
+        {
+            current: null,
+            stat: 'Def. Efficiency',
+            new: null
+        },
+        {
+            current: null,
+            stat: '# Possessions',
+            new: null
+        }
+    ]
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -80,12 +210,16 @@ function drawPlayerSelectionBox(rawdata) {
         .data(playerData)
         .enter()
         .append("g")
+        .attr("id", function(d) {
+            return d.key
+        })
         .attr("class", "player-box")
         .attr("transform", function (d, i) {
             xVal = i * rectWidth + rectPadding;
             yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
+<<<<<<< HEAD
         .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
@@ -97,6 +231,10 @@ function drawPlayerSelectionBox(rawdata) {
             console.log(selectedPlayerMap);
             updateData();
         });
+=======
+        .on("click", mouseClickPlayerBox);
+
+>>>>>>> origin/master
     playerContainers.append("rect")
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
@@ -115,8 +253,8 @@ function drawPlayerSelectionBox(rawdata) {
 }
 
 function drawRadialBarChart(csv_path) {
-    var width = 960,
-        height = 500,
+    var width = 400,
+        height = 400,
         barHeight = height / 2 - 40;
 
     var formatNumber = d3.format("s");
@@ -135,21 +273,26 @@ function drawRadialBarChart(csv_path) {
     d3.csv(csv_path, function(error, data) {
 
         data.map(function(d) {
-            return d['off_rating'] = +d['off_rating'];
+            return d['clinch_rating'] = +d['clinch_rating'];
         });
 
         data = removeNonSelectedPlayers(data);
 
-        data.sort(function(a,b) { return b.off_rating - a.off_rating; });
+        if (data.length > 20) {
+            data = data.slice(0, 20);
+        }
+
+
+        data.sort(function(a,b) { return b.clinch_rating - a.clinch_rating; });
 
         var extent = d3.extent(data, function(d) {
-            return d.off_rating;
+            return d.clinch_rating;
         });
         var barScale = d3.scale.linear()
             .domain(extent)
             .range([0, barHeight]);
 
-        var keys = data.map(function(d,i) { return d.off_rating; });
+        var keys = data.map(function(d,i) { return d.clinch_rating; });
         var numBars = keys.length;
 
         var x = d3.scale.linear()
@@ -180,11 +323,12 @@ function drawRadialBarChart(csv_path) {
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
             .style("fill", function (d) { return color(d.name); })
-            .attr("d", arc);
+            .attr("d", arc)
+            .on("click", mouseClickPlayerArc);;
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
-                var i = d3.interpolate(d.outerRadius, barScale(+d.off_rating));
+                var i = d3.interpolate(d.outerRadius, barScale(+d.clinch_rating));
                 return function(t) { d.outerRadius = i(t); return arc(d,index); };
             });
 
@@ -228,18 +372,162 @@ function drawRadialBarChart(csv_path) {
             .attr("xlink:href", "#label-path")
             .attr("startOffset", function(d, i) {return i * 100 / numBars + 50 / numBars + '%';})
             .text(function(d, i) {
-                return parseInt(i);
+                return getNonSelectedPlayerName(d, i);
             });
     });
 }
 
+function drawTable(data) {
+
+    // column definitions
+    var columns = [
+        { head: 'Current', cl: 'num', html: ƒ('current', d3.format('.1f')) },
+        { head: 'Stat', cl: 'center', html: ƒ('stat') },
+        { head: 'New', cl: 'num', html: ƒ('new', d3.format('.1f')) },
+    ];
+
+    d3.select('#table').selectAll('*').remove();
+
+    // create table
+    var table = d3.select('#table')
+        .append('table')
+        .attr('class', 'table table-borderless');
+
+    // create table header
+    table.append('thead').append('tr')
+        .selectAll('th')
+        .data(columns).enter()
+        .append('th')
+        .attr('class', ƒ('cl'))
+        .text(ƒ('head'));
+
+
+    if (data == null && currentLineup == null) {
+        data = [
+            {
+                current: null,
+                stat: 'Clinch Rating',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Effective FG%',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Rebounding Rate',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Turnover Rate',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Free Throw Rate',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Off. Efficiency',
+                new: null
+            },
+            {
+                current: null,
+                stat: 'Def. Efficiency',
+                new: null
+            },
+            {
+                current: null,
+                stat: '# Possessions',
+                new: null
+            }
+        ]
+    }
+    else if (data == null && currentLineup != null) {
+        data = [
+            {
+                current: currentLineup.clinch_rating,
+                stat: 'Clinch Rating',
+                new: null
+            },
+            {
+                current: currentLineup.eff_fg,
+                stat: 'Effective FG%',
+                new: null
+            },
+            {
+                current: currentLineup.reb_rate,
+                stat: 'Rebounding Rate',
+                new: null
+            },
+            {
+                current: currentLineup.to_rate,
+                stat: 'Turnover Rate',
+                new: null
+            },
+            {
+                current: currentLineup.ft_rate,
+                stat: 'Free Throw Rate',
+                new: null
+            },
+            {
+                current: currentLineup.off_rating,
+                stat: 'Off. Efficiency',
+                new: null
+            },
+            {
+                current: currentLineup.def_rating,
+                stat: 'Def. Efficiency',
+                new: null
+            },
+            {
+                current: currentLineup.num_poss,
+                stat: '# Possessions',
+                new: null
+            }
+        ]
+    }
+
+        table.append('tbody')
+            .selectAll('tr')
+            .data(data).enter()
+            .append('tr')
+            .selectAll('td')
+            .data(function(row, i) {
+                return columns.map(function(c) {
+                    // compute cell values for this specific row
+                    var cell = {};
+                    d3.keys(c).forEach(function(k) {
+                        cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                    });
+                    if (row['new'] == null && cell.head == 'New') {
+                        cell.html = '-';
+                    }
+                    return cell;
+                });
+            }).enter()
+            .append('td')
+            .html(ƒ('html'))
+            .attr('class', ƒ('cl'));
+
+}
+
 function drawScatterPlot(csv_path) {
+<<<<<<< HEAD
     var width = 960,
         xWidth = 900,
         height = 600,
         yHeight = 25,
         xHeight = 580;
     var tooltip;
+=======
+    var width = 400,
+        height = 400
+
+>>>>>>> origin/master
     d3.select('#scatterplot').selectAll('*').remove();
     var tooltip = d3.select("#scatterplot").append("div")
       .attr("class", "tooltip")
