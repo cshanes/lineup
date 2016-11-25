@@ -40,7 +40,7 @@ function updateData() {
 
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
-        drawTable(null);
+        drawTable();
     })
 
 }
@@ -227,6 +227,7 @@ function drawPlayerSelectionBox(rawdata) {
         .attr("y", 0)
         .attr("width", rectWidth)
         .attr("height", rectHeight)
+        // .attr("class", "hvr-grow")
         .attr("fill", "royalblue");
 
     playerContainers.append("text")
@@ -309,6 +310,7 @@ function drawRadialBarChart(csv_path) {
             .each(function(d) { d.outerRadius = 0; })
             .style("fill", function (d) { return color(d.name); })
             .attr("d", arc)
+            .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
             .on("mouseover", arcMouseOver);
 

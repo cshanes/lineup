@@ -10,11 +10,16 @@
 
 .player-box {
   font-size: 10px;
+  cursor: pointer;
 }
 
 .selected {
   stroke: #00ff9f;
   stroke-width: 3px;
+}
+
+.arc {
+  cursor: pointer;
 }
 
 tooltip {	
