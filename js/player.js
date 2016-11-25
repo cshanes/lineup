@@ -1,6 +1,5 @@
 
 var selectedPlayerMap = {};
-var currentLineupData = [];
 var currentLineup = null;
 
 var containerWidth = 1300;
@@ -14,8 +13,10 @@ var areaWidth = 15 * (rectWidth + rectPadding + 16);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
+var lineupData = [];
 
 function updateData() {
+
     var size = Object.keys(selectedPlayerMap).length;
     var filename = "data/fivePlayerLineups.csv";
     var currentLineupFile = "data/fivePlayerLineups.csv";
@@ -34,7 +35,6 @@ function updateData() {
     }
 
     d3.csv(currentLineupFile, function(d) {
-        currentLineupData = d;
         setCurrentLineup();
 
         drawRadialBarChart(filename);
@@ -49,8 +49,46 @@ function init() {
     updateData();
 }
 
+function getLineupKey(namesList) {
+    return namesList.sort().join('');
+}
+
+function getRowNames(row, numPlayers) {
+    var result = [];
+    for(var i = 0; i < numPlayers; i++) {
+        var columnName = 'player' + parseInt(i);
+        var playerName = row[columnName];
+        result.push(playerName);
+    }
+    return result;
+}
+
+function setLineupData(data, numPlayers) {
+    for(var i = 0; i < data.length; i++) {
+        var row = data[i];
+        var namesList = getRowNames(row, numPlayers);
+        var key = getLineupKey(namesList);
+        lineupData[key] = row;
+    }
+}
+
 function readIn() {
     d3.csv('data/singlePlayerData.csv', drawPlayerSelectionBox);
+    d3.csv('data/singlePlayerData.csv', function(data) {
+        setLineupData(data, 1);
+    });
+    d3.csv('data/twoPlayerLineups.csv', function(data) {
+        setLineupData(data, 2);
+    });
+    d3.csv('data/threePlayerLineups.csv', function(data) {
+        setLineupData(data, 3);
+    });
+    d3.csv('data/fourPlayerLineups.csv', function(data) {
+        setLineupData(data, 4);
+    });
+    d3.csv('data/fivePlayerLineups.csv', function(data) {
+        setLineupData(data, 5);
+    });
 }
 
 //remove data rows that do not include currently selected players
@@ -98,37 +136,22 @@ function getNonSelectedPlayerName(data, i) {
 }
 
 function setCurrentLineup() {
-    var numSelected = Object.keys(selectedPlayerMap).length;
-
-    for (var i = 0; i < currentLineupData.length; i++) {
-        var row = currentLineupData[i];
-        var rowPlayerNames = {}
-        for (var j = 0; j < numSelected; j++) {
-            var columnName = 'player' + parseInt(j);
-            var playerName = row[columnName];
-            rowPlayerNames[playerName] = true
-        }
-        var allPlayersInRow = true;
-        for (var key in selectedPlayerMap) {
-            if (!(key in rowPlayerNames)) {
-                allPlayersInRow = false;
-            }
-        }
-
-        if (!allPlayersInRow) {
-            continue;
-        }
-        currentLineup = row;
-        return;
+    var lineupKeyList = [];
+    for (var key in selectedPlayerMap) {
+        lineupKeyList.push(key);
     }
+    var lineupKey = getLineupKey(lineupKeyList);
+    console.log('current lineup: ' + lineupData[lineupKey]);
+    currentLineup = lineupData[lineupKey];
 }
 
 function mouseClickPlayerBox(d) {
-    if (d.key in selectedPlayerMap) {
-        delete selectedPlayerMap[d.key];
+    var name = d.key;
+    if (name in selectedPlayerMap) {
+        delete selectedPlayerMap[name];
         d3.select(this).selectAll('rect').classed("selected", false)
     } else {
-        selectedPlayerMap[d.key] = d.values[0];
+        selectedPlayerMap[name] = d.values[0];
         d3.select(this).selectAll('rect').classed("selected", true)
     }
     console.log(selectedPlayerMap);
