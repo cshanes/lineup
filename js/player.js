@@ -1,6 +1,7 @@
 
 var selectedPlayerMap = {};
 var currentLineup = null;
+var nextLineup = null;
 
 var containerWidth = 1300;
 var containerHeight = 120;
@@ -164,6 +165,22 @@ function mouseClickPlayerArc(d) {
     d3.select(boxId).selectAll('rect').classed("selected", true)
     console.log(selectedPlayerMap);
     updateData();
+}
+
+function arcMouseOver(d) {
+    var name = d.nextPlayer;
+    console.log(name);
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var namesList = [name];
+    for (var i = 0; i < numSelected; i++) {
+        var columnName = 'player' + parseInt(i);
+        var playerName = d[columnName];
+        namesList.push(playerName);
+    }
+    console.log(namesList);
+    var lineupKey = getLineupKey(namesList);
+    nextLineup = lineupData[lineupKey];
+    drawTable();
 }
 
 function mouseOverPlayerArc(d) {
@@ -337,7 +354,8 @@ function drawRadialBarChart(csv_path) {
             .each(function(d) { d.outerRadius = 0; })
             .style("fill", function (d) { return color(d.name); })
             .attr("d", arc)
-            .on("click", mouseClickPlayerArc);;
+            .on("click", mouseClickPlayerArc)
+            .on("mouseover", arcMouseOver);
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -390,7 +408,7 @@ function drawRadialBarChart(csv_path) {
     });
 }
 
-function drawTable(data) {
+function drawTable() {
 
     // column definitions
     var columns = [
@@ -414,8 +432,8 @@ function drawTable(data) {
         .attr('class', ƒ('cl'))
         .text(ƒ('head'));
 
-
-    if (data == null && currentLineup == null) {
+    var data = null;
+    if (nextLineup == null && currentLineup == null) {
         data = [
             {
                 current: null,
@@ -459,7 +477,7 @@ function drawTable(data) {
             }
         ]
     }
-    else if (data == null && currentLineup != null) {
+    else if (nextLineup == null && currentLineup != null) {
         data = [
             {
                 current: currentLineup.clinch_rating,
@@ -500,6 +518,49 @@ function drawTable(data) {
                 current: currentLineup.num_poss,
                 stat: '# Possessions',
                 new: null
+            }
+        ]
+    } else {
+        data = [
+            {
+                current: currentLineup.clinch_rating,
+                stat: 'Clinch Rating',
+                new: nextLineup.clinch_rating
+            },
+            {
+                current: currentLineup.eff_fg,
+                stat: 'Effective FG%',
+                new: nextLineup.eff_fg
+            },
+            {
+                current: currentLineup.reb_rate,
+                stat: 'Rebounding Rate',
+                new: nextLineup.reb_rate
+            },
+            {
+                current: currentLineup.to_rate,
+                stat: 'Turnover Rate',
+                new: nextLineup.ro_rate
+            },
+            {
+                current: currentLineup.ft_rate,
+                stat: 'Free Throw Rate',
+                new: nextLineup.ft_rate
+            },
+            {
+                current: currentLineup.off_rating,
+                stat: 'Off. Efficiency',
+                new: nextLineup.off_rating
+            },
+            {
+                current: currentLineup.def_rating,
+                stat: 'Def. Efficiency',
+                new: nextLineup.def_rating
+            },
+            {
+                current: currentLineup.num_poss,
+                stat: '# Possessions',
+                new: nextLineup.num_poss
             }
         ]
     }
