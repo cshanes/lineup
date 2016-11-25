@@ -183,51 +183,6 @@ function arcMouseOver(d) {
     drawTable();
 }
 
-function mouseOverPlayerArc(d) {
-    data = [
-        {
-            current: null,
-            stat: 'Clinch Rating',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Effective FG%',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Rebounding Rate',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Turnover Rate',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Free Throw Rate',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Off. Efficiency',
-            new: null
-        },
-        {
-            current: null,
-            stat: 'Def. Efficiency',
-            new: null
-        },
-        {
-            current: null,
-            stat: '# Possessions',
-            new: null
-        }
-    ]
-}
-
 function drawPlayerSelectionBox(rawdata) {
     var playerData = d3.nest()
         .key(function (d) {
@@ -598,9 +553,11 @@ function drawScatterPlot(csv_path) {
         height = 400
 
     d3.select('#scatterplot').selectAll('*').remove();
+
     var tooltip = d3.select("#scatterplot").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
         .attr("height", height)
