@@ -9,12 +9,19 @@ var containerHeight = 120;
 var rectWidth = 40;
 var rectHeight = 40;
 var rectPadding = 20;
-var areaWidth = 15 * (rectWidth + rectPadding + 16);
+var areaWidth = 16 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
+<<<<<<< Updated upstream
 var lineupData = [];
+=======
+function init() {
+    readIn();
+    updateData();
+}
+>>>>>>> Stashed changes
 
 function updateData() {
 
@@ -45,6 +52,7 @@ function updateData() {
 
 }
 
+<<<<<<< Updated upstream
 function init() {
     readIn();
     updateData();
@@ -73,6 +81,8 @@ function setLineupData(data, numPlayers) {
     }
 }
 
+=======
+>>>>>>> Stashed changes
 function readIn() {
     d3.csv('data/singlePlayerData.csv', drawPlayerSelectionBox);
     d3.csv('data/singlePlayerData.csv', function(data) {
@@ -218,6 +228,20 @@ function drawPlayerSelectionBox(rawdata) {
             yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
+<<<<<<< Updated upstream
+=======
+        .on("click", function(d) {
+            if (d.key in selectedPlayerMap) {
+                delete selectedPlayerMap[d.key];
+                d3.select(this).selectAll('rect').classed("selected", false)
+            } else {
+                selectedPlayerMap[d.key] = d.values[0]
+                d3.select(this).selectAll('rect').classed("selected", true)
+            }
+            console.log(selectedPlayerMap);
+            updateData();
+        })
+>>>>>>> Stashed changes
         .on("click", mouseClickPlayerBox);
 
     playerContainers.append("rect")
@@ -547,13 +571,21 @@ function drawTable() {
 }
 
 function drawScatterPlot(csv_path) {
+<<<<<<< Updated upstream
     var xWidth = 900,
+=======
+    var yWidth = 340
+        xWidth = 340,
+>>>>>>> Stashed changes
         yHeight = 25,
-        xHeight = 580;
+        xHeight = 380;
     var tooltip;
     var width = 400,
         height = 400
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     d3.select('#scatterplot').selectAll('*').remove();
 
     var tooltip = d3.select("#scatterplot").append("div")
@@ -580,7 +612,7 @@ function drawScatterPlot(csv_path) {
 
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
-            yScale = d3.scale.linear().range([height, 0]), // value -> display
+            yScale = d3.scale.linear().range([yWidth, 0]), // value -> display
             yMap = function(d) { return yScale(yValue(d));}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left");
 
@@ -603,7 +635,7 @@ function drawScatterPlot(csv_path) {
         // y-axis
         svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate("+yHeight+","+-20+")")
+            .attr("transform", "translate("+yHeight+","+40+")")
             .call(yAxis)
             .append("text")
             .attr("class", "label")
