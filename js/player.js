@@ -14,14 +14,13 @@ var areaWidth = 16 * (rectWidth + rectPadding + 17);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
-<<<<<<< Updated upstream
+
 var lineupData = [];
-=======
+
 function init() {
     readIn();
     updateData();
 }
->>>>>>> Stashed changes
 
 function updateData() {
 
@@ -48,15 +47,10 @@ function updateData() {
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
-    })
+    });
 
 }
 
-<<<<<<< Updated upstream
-function init() {
-    readIn();
-    updateData();
-}
 
 function getLineupKey(namesList) {
     return namesList.sort().join('');
@@ -81,8 +75,6 @@ function setLineupData(data, numPlayers) {
     }
 }
 
-=======
->>>>>>> Stashed changes
 function readIn() {
     d3.csv('data/singlePlayerData.csv', drawPlayerSelectionBox);
     d3.csv('data/singlePlayerData.csv', function(data) {
@@ -125,7 +117,7 @@ function removeNonSelectedPlayers(data) {
             } else {
                 return false;
             }
-        })
+        });
     }
     return result;
 }
@@ -228,8 +220,6 @@ function drawPlayerSelectionBox(rawdata) {
             yVal = 15;
             return "translate(" + [xVal, yVal] + ")"
         })
-<<<<<<< Updated upstream
-=======
         .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
@@ -241,9 +231,6 @@ function drawPlayerSelectionBox(rawdata) {
             console.log(selectedPlayerMap);
             updateData();
         })
->>>>>>> Stashed changes
-        .on("click", mouseClickPlayerBox);
-
     playerContainers.append("rect")
         .attr("x", function (d, i) {
             return rectPadding + rectWidth * i
@@ -571,97 +558,106 @@ function drawTable() {
 }
 
 function drawScatterPlot(csv_path) {
-<<<<<<< Updated upstream
-    var xWidth = 900,
-=======
-    var yWidth = 340
+    var yWidth = 360,
         xWidth = 340,
->>>>>>> Stashed changes
         yHeight = 25,
-        xHeight = 380;
+        xHeight = 360;
     var tooltip;
     var width = 400,
         height = 400
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
+        yDiff = height-yWidth;
+    console.log(yDiff)
     d3.select('#scatterplot').selectAll('*').remove();
 
     var tooltip = d3.select("#scatterplot").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0);
+        .style("opacity", 10);
 
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g");
-
     d3.csv(csv_path, function(error, data) {
         data.map(function(d) {
             return d['off_rating'] = +d['off_rating'],
-               d['def_rating'] = +d['def_rating'];
+               d['def_rating'] = +d['def_rating'],
+               d['num_poss']  = +d['num_poss'],
+               d['clinch_rating'] = +d['clinch_rating'],
+               sizeMax = d3.max(data, function(d) { return d.num_poss; }),
+               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
+               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
+               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
+               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
+               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         });
-
         data = removeNonSelectedPlayers(data);
         // setup x
         var xValue = function(d) { return d.def_rating ;}, // data -> value
-            xScale = d3.scale.linear().range([0, xWidth]), // value -> display
+            xScale = d3.scale.linear().range([yHeight, xWidth]), // value -> display
             xMap = function(d) {return xScale(xValue(d));}, // data -> display
             xAxis = d3.svg.axis().orient("bottom").scale(xScale);
 
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
-            yScale = d3.scale.linear().range([yWidth, 0]), // value -> display
+            yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
             yMap = function(d) { return yScale(yValue(d));}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left");
-
+            
+        //setup width and color
+        var size = function(d){return d.num_poss;},
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([3,10]),
+            rMap = function(d){return rscale(size(d));};
+        var color = function(d){return d.clinch_rating;},
+            colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
+            cMap = function(d){return colorScale(color(d))};
+            
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-
+        xScale.domain([0, d3.max(data, xValue)+1]);
+        yScale.domain([0, d3.max(data, yValue)+1]);
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate("+yHeight+"," + xHeight + ")")
+            .attr("transform", "translate("+0+"," + xHeight + ")")
             .call(xAxis)
             .append("text")
             .attr("class", "label")
             .attr("x", xWidth)
-            .attr("y", -20)
+            .attr("y", -5)
             .style("text-anchor", "end")
             .text("Defensive Efficiency");
 
         // y-axis
         svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate("+yHeight+","+40+")")
+            .attr("transform", "translate("+yHeight+","+0+")")
             .call(yAxis)
             .append("text")
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
-            .attr("y", 6)
+            .attr("x", -40)
+            .attr("y", 10)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
             .text("Offensive Efficiency");
-
+        
         // draw dots
         svg.selectAll(".dot")
             .data(data)
             .enter().append("circle")
             .attr("class", "dot")
-            .attr("r", 5) //make dynamic with number of posessions
+            .attr("r", 5)
+          //.attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
-            .style("fill", 'steelblue') //make dynamic with score
+            .style("fill", cMap) //make dynamic with score
             .on("mouseover", function(d) {
                  tooltip.transition()
                      .duration(200)
                      .style("opacity", 1);
-                 tooltip.html(d["playername"]+ "<br/> (Defensive Efficiency: " + d["def_rating"] 
-                     + ", Offensive Efficiency: " + d["off_rating"] + ")")
-                     .style("left", (d3.event.pageX + 5) + "px")
-                     .style("top", (d3.event.pageY - 28) + "px");
+                 tooltip.html(d["player0"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
+                        + ", Offensive Efficiency: " + d["off_rating"] + ")")
+                    .style("left", (d3.event.x + 5) + "px")
+                    .style("top", (d3.event.y - 40) + "py");
             })
             .on("mouseout", function(d) {
                 tooltip.transition()
