@@ -47,7 +47,7 @@ function updateData() {
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
-        drawFilters(filename);
+ //       drawFilters(filename);
     });
 
 }
@@ -568,12 +568,13 @@ function drawTable() {
 function drawScatterPlot(csv_path) {
     var yWidth = 360,
         xWidth = 340,
-        yHeight = 25,
+        yHeight = 40,
         xHeight = 360;
     var tooltip;
     var width = 400,
         height = 400
-        yDiff = height-yWidth;
+        yDiff = height-yWidth
+        xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
 
     var tooltip = d3.select("#scatterplot").append("div")
@@ -622,6 +623,76 @@ function drawScatterPlot(csv_path) {
         xScale.domain([0, d3.max(data, xValue)+1]);
         yScale.domain([0, d3.max(data, yValue)+1]);
 
+      function make_x_gridlines() {		
+          return d3.svg.axis()
+              .scale(xScale)
+              .orient("bottom")
+              .ticks(5)
+          }
+      function make_y_gridlines() {		
+          return d3.svg.axis()
+            .scale(yScale)
+            .orient("left")
+            .ticks(5)
+          }
+        //adding X gridline
+        svg.append("g")		
+            .attr("stroke", "grey")
+            .attr("fill", "none")
+            .attr("opacity", 0.7)
+            .attr("rendering", "crispEdges")
+            .attr("transform", "translate(" + 0 + "," + height/2 + ")")
+            .call(make_x_gridlines()
+                .tickSize(1)
+                .tickFormat(""))
+            .style("stroke-dasharray","5,5");
+        // add the Y gridlines
+        svg.append("g")	
+            .attr("stroke", "grey")
+            .attr("fill", "none")
+            .attr("opacity", 0.7)
+            .attr("rendering", "crispEdges")
+            .attr("transform", "translate(" + yWidth/2 + "," + 0 + ")")
+            .call(make_y_gridlines()
+              .tickSize(1)
+              .tickFormat(""))
+            .style("stroke-dasharray","5,5")
+            .append("text")
+            .attr("stroke", "none")
+            .attr("fill", "black")
+            .attr("class", "label")
+            .attr("x", 50)
+            .attr("y", 40)
+            .attr("dy", ".71em")
+            .text("Superstars");
+          svg.append("text")
+            .attr("opacity", 0.7)
+            .attr("stroke", "none")
+            .attr("fill", "black")
+            .attr("class", "label")
+            .attr("x", 70)
+            .attr("y", 40)
+            .attr("dy", ".71em")
+            .text("Offense Masters");
+          svg.append("text")
+            .attr("opacity", 0.7)
+            .attr("stroke", "none")
+            .attr("fill", "black")
+            .attr("class", "label")
+            .attr("x", 220)
+            .attr("y", 350)
+            .attr("dy", ".71em")
+            .text("Defense Masters");
+          svg.append("text")
+            .attr("opacity", 0.7)
+            .attr("stroke", "none")
+            .attr("fill", "black")
+            .attr("class", "label")
+            .attr("x", 70)
+            .attr("y", 350)
+            .attr("dy", ".71em")
+            .text("Room to Improve");
+            
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
@@ -630,7 +701,7 @@ function drawScatterPlot(csv_path) {
             .append("text")
             .attr("class", "label")
             .attr("x", xWidth)
-            .attr("y", -5)
+            .attr("y", 30)
             .style("text-anchor", "end")
             .text("Defensive Efficiency");
 
@@ -643,7 +714,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
             .attr("x", -40)
-            .attr("y", 10)
+            .attr("y", -35)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
             .text("Offensive Efficiency");
@@ -656,7 +727,8 @@ function drawScatterPlot(csv_path) {
             .attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
-            .style("fill", cMap) //make dynamic with score
+            .style("fill", cMap)
+            //Tooltip
             .on("mouseover", function(d) {
                  tooltip.transition()
                      .duration(200)
@@ -664,7 +736,10 @@ function drawScatterPlot(csv_path) {
                  tooltip.html(d["player0"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
                         + ", Offensive Efficiency: " + d["off_rating"] + ")")
                     .style("left", (d3.event.x + 5) + "px")
-                    .style("top", (d3.event.y - 40) + "py");
+                    .style("top", (d3.event.y - 20) + "py")
+                    .style("background-color", "#D3D3D3")
+                    .style("padding", "3px")
+                    .style("border-radius", "2px");
             })
             .on("mouseout", function(d) {
                 tooltip.transition()
