@@ -205,8 +205,8 @@ function drawPlayerSelectionBox(rawdata) {
         .attr("y", 0)
         .attr("width", playerBoxWidth)
         .attr("height", playerBoxHeight)
-        .attr("stroke", "#D3D3D3D3")
-        .attr("fill", "#D3D3D3D3");
+        .attr("stroke", "#D3D3D3")
+        .attr("fill", "#D3D3D3");
 
     var playerContainers = area.selectAll('.bar')
         .data(playerData)
@@ -327,7 +327,8 @@ function drawRadialBarChart(csv_path) {
             .data(data)
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
-            .style("fill", function (d) { return color(d.name); })
+            //.style("fill", function (d) { return color(d.name); })
+            .style("fill", "#996600")
             .attr("d", arc)
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
@@ -566,6 +567,11 @@ function drawTable() {
 }
 
 function drawScatterPlot(csv_path) {
+  
+  //How do we want to deal with occlusion
+  //Do we want to add on click to scatterplot?
+  //Help with tooltip issues
+  
     var yWidth = 360,
         xWidth = 340,
         yHeight = 40,
