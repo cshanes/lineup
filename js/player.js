@@ -9,6 +9,7 @@ var containerHeight = 120;
 var rectWidth = 40;
 var rectHeight = 40;
 var rectPadding = 20;
+var rVal= 30;
 var areaWidth = 16 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
@@ -153,10 +154,10 @@ function mouseClickPlayerBox(d) {
     var name = d.key;
     if (name in selectedPlayerMap) {
         delete selectedPlayerMap[name];
-        d3.select(this).selectAll('rect').classed("selected", false)
+        d3.select(this).selectAll('circle').classed("selected", false)
     } else {
         selectedPlayerMap[name] = d.values[0];
-        d3.select(this).selectAll('rect').classed("selected", true)
+        d3.select(this).selectAll('circle').classed("selected", true)
     }
     console.log(selectedPlayerMap);
     updateData();
@@ -165,7 +166,7 @@ function mouseClickPlayerBox(d) {
 function mouseClickPlayerArc(d) {
     selectedPlayerMap[d.nextPlayer] = d;
     var boxId = '#' + d.nextPlayer;
-    d3.select(boxId).selectAll('rect').classed("selected", true)
+    d3.select(boxId).selectAll('circle').classed("selected", true)
     console.log(selectedPlayerMap);
     updateData();
 }
@@ -224,23 +225,14 @@ function drawPlayerSelectionBox(rawdata) {
         .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
-                d3.select(this).selectAll('rect').classed("selected", false)
+                d3.select(this).selectAll('circle').classed("selected", false)
             } else {
                 selectedPlayerMap[d.key] = d.values[0]
-                d3.select(this).selectAll('rect').classed("selected", true)
+                d3.select(this).selectAll('circle').classed("selected", true)
             }
             console.log(selectedPlayerMap);
             updateData();
         })
-    playerContainers.append("rect")
-        .attr("x", function (d, i) {
-            return rectPadding + rectWidth * i
-        })
-        .attr("y", 0)
-        .attr("width", rectWidth)
-        .attr("height", rectHeight)
-        // .attr("class", "hvr-grow")
-        .attr("fill", "none");
 
     playerContainers.append("text")
       .text(function(d){ return d.key; })
@@ -254,7 +246,17 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("x", function(d,i){return (rectPadding + (rectWidth * i))})
       .attr("y", 0)
       .attr("width", rectWidth)
-      .attr("height", rectHeight);
+      .attr("height", rectHeight)
+      .style("border-radius", "10px");
+      
+    playerContainers.append("circle")
+        .attr("cx", function (d, i) {
+            return rectPadding + rectWidth * i +20
+        })
+        .attr("cy", 20)
+        .attr("r", rVal)
+        // .attr("class", "hvr-grow")
+        .attr("fill", "url(#image)");
 }
 
 function drawRadialBarChart(csv_path) {
@@ -735,6 +737,7 @@ function drawScatterPlot(csv_path) {
             .data(data)
             .attr("id", function(d) {return d.key})
             .enter().append("circle")
+            .attr("stroke", "black")
             .attr("class", "dot")
             .attr("r", rMap)  
             .attr("cx", xMap)
@@ -748,7 +751,7 @@ function drawScatterPlot(csv_path) {
                  tooltip.html(d["nextPlayer"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
                         + ", Offensive Efficiency: " + d["off_rating"] + ")")
                     .style("left", (d3.event.x + 5) + "px")
-                    .style("top", (d3.event.y - 20) + "py")
+                    .style("top", (d3.event.y - 20) + "px")
                     .style("background-color", "#D3D3D3")
                     .style("padding", "3px")
                     .style("border-radius", "2px");
