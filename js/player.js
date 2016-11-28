@@ -47,6 +47,7 @@ function updateData() {
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
+        drawFilters(filename);
     });
 
 }
@@ -566,7 +567,6 @@ function drawScatterPlot(csv_path) {
     var width = 400,
         height = 400
         yDiff = height-yWidth;
-    console.log(yDiff)
     d3.select('#scatterplot').selectAll('*').remove();
 
     var tooltip = d3.select("#scatterplot").append("div")
@@ -605,7 +605,7 @@ function drawScatterPlot(csv_path) {
             
         //setup width and color
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([3,10]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,8]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
@@ -614,6 +614,7 @@ function drawScatterPlot(csv_path) {
         // don't want dots overlapping axis, so add in buffer to data domain
         xScale.domain([0, d3.max(data, xValue)+1]);
         yScale.domain([0, d3.max(data, yValue)+1]);
+
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
@@ -645,8 +646,7 @@ function drawScatterPlot(csv_path) {
             .data(data)
             .enter().append("circle")
             .attr("class", "dot")
-            .attr("r", 5)
-          //.attr("r", rMap)  
+            .attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
             .style("fill", cMap) //make dynamic with score
@@ -665,5 +665,35 @@ function drawScatterPlot(csv_path) {
                     .style("opacity", 0);
             });
     })
-
 }
+function drawFilters(csv_path) {
+  var yWidth = 360,
+        xWidth = 340,
+        yHeight = 25,
+        xHeight = 360;
+    var tooltip;
+    var width = 400,
+        height = 400
+        yDiff = height-yWidth;
+    d3.select('#filter').selectAll('*').remove();
+
+    var svg = d3.select('#filter').append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g");
+    d3.csv(csv_path, function(error, data) {
+        data.map(function(d) {
+            return d['off_rating'] = +d['off_rating'],
+               d['def_rating'] = +d['def_rating'],
+               d['num_poss']  = +d['num_poss'],
+               d['clinch_rating'] = +d['clinch_rating'],
+               sizeMax = d3.max(data, function(d) { return d.num_poss; }),
+               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
+               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
+               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
+               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
+               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
+        });
+        data = removeNonSelectedPlayers(data);
+    })
+} 
