@@ -666,34 +666,21 @@ function drawScatterPlot(csv_path) {
             });
     })
 }
-function drawFilters(csv_path) {
-  var yWidth = 360,
-        xWidth = 340,
-        yHeight = 25,
-        xHeight = 360;
-    var tooltip;
-    var width = 400,
-        height = 400
-        yDiff = height-yWidth;
-    d3.select('#filter').selectAll('*').remove();
+//function drawFilters(csv_path) {
+//    var width = 200,
+//        height = 200
+//    d3.select('#filter').selectAll('*').remove();
 
-    var svg = d3.select('#filter').append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
-    d3.csv(csv_path, function(error, data) {
-        data.map(function(d) {
-            return d['off_rating'] = +d['off_rating'],
-               d['def_rating'] = +d['def_rating'],
-               d['num_poss']  = +d['num_poss'],
-               d['clinch_rating'] = +d['clinch_rating'],
-               sizeMax = d3.max(data, function(d) { return d.num_poss; }),
-               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
-               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
-               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
-               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
-               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
-        });
-        data = removeNonSelectedPlayers(data);
-    })
-} 
+//    var svg = d3.select('#filter').append("svg")
+//        .attr("width", width)
+//        .attr("height", height)
+//        .append("g");
+//    d3.csv(csv_path, function(error, data) {
+//        data.map(function(d) {
+//            return d['off_rating'] = +d['off_rating'],
+//               d['def_rating'] = +d['def_rating'],
+//               d['clinch_rating'] = +d['clinch_rating'];
+//        });
+//        data = removeNonSelectedPlayers(data);
+//    })
+//} 
