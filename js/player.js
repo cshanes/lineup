@@ -205,8 +205,8 @@ function drawPlayerSelectionBox(rawdata) {
         .attr("y", 0)
         .attr("width", playerBoxWidth)
         .attr("height", playerBoxHeight)
-        .attr("stroke", "black")
-        .attr("fill", "none");
+        .attr("stroke", "#D3D3D3D3")
+        .attr("fill", "#D3D3D3D3");
 
     var playerContainers = area.selectAll('.bar')
         .data(playerData)
@@ -240,7 +240,7 @@ function drawPlayerSelectionBox(rawdata) {
         .attr("width", rectWidth)
         .attr("height", rectHeight)
         // .attr("class", "hvr-grow")
-        .attr("fill", "royalblue");
+        .attr("fill", "none");
 
     playerContainers.append("text")
       .text(function(d){ return d.key; })
@@ -248,6 +248,13 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("x", function(d,i){return 20 + (rectPadding + (rectWidth * i))})
       .attr("y", 60)
       .attr("font-family", "sans-serif");
+    
+    playerContainers.append("image")
+      .attr("xlink:href", function(d) {return ("js/photos/" +  d.key + ".jpeg"); })
+      .attr("x", function(d,i){return (rectPadding + (rectWidth * i))})
+      .attr("y", 0)
+      .attr("width", rectWidth)
+      .attr("height", rectHeight);
 }
 
 function drawRadialBarChart(csv_path) {
