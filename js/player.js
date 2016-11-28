@@ -569,8 +569,8 @@ function drawTable() {
 function drawScatterPlot(csv_path) {
   
   //How do we want to deal with occlusion
-  //Do we want to add on click to scatterplot?
   //Help with tooltip issues
+  
   
     var yWidth = 360,
         xWidth = 340,
@@ -604,6 +604,11 @@ function drawScatterPlot(csv_path) {
                colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
                colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         });
+        var playerData = d3.nest()
+        .key(function (d) {
+            return (d.player0);
+        })
+          .entries(data);
         data = removeNonSelectedPlayers(data);
         // setup x
         var xValue = function(d) { return d.def_rating ;}, // data -> value
@@ -728,6 +733,7 @@ function drawScatterPlot(csv_path) {
         // draw dots
         svg.selectAll(".dot")
             .data(data)
+            .attr("id", function(d) {return d.key})
             .enter().append("circle")
             .attr("class", "dot")
             .attr("r", rMap)  
@@ -739,7 +745,7 @@ function drawScatterPlot(csv_path) {
                  tooltip.transition()
                      .duration(200)
                      .style("opacity", 1);
-                 tooltip.html(d["player0"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
+                 tooltip.html(d["nextPlayer"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
                         + ", Offensive Efficiency: " + d["off_rating"] + ")")
                     .style("left", (d3.event.x + 5) + "px")
                     .style("top", (d3.event.y - 20) + "py")
@@ -751,7 +757,19 @@ function drawScatterPlot(csv_path) {
                 tooltip.transition()
                     .duration(500)
                     .style("opacity", 0);
-            });
+            })
+            .on("click", function(d) {
+            if (d.key in selectedPlayerMap) {
+                delete selectedPlayerMap[d.key];
+                d3.select(this).selectAll('.dot').classed("selected", false)
+            } else {
+                selectedPlayerMap[d.nextPlayer] = d.nextPlayer;
+                d3.select(this).selectAll('.dot').classed("selected", true)
+            }
+            console.log(selectedPlayerMap);
+            updateData();
+            })
+            .on("click", mouseClickPlayerArc);
     })
 }
 //function drawFilters(csv_path) {
