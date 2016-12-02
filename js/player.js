@@ -186,7 +186,23 @@ function arcMouseOver(d) {
     nextLineup = lineupData[lineupKey];
     drawTable();
 }
-
+function circleMouseOver(d) {
+    var name = d.nextPlayer;
+    var tooltip = d3.select("#scatterplot").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 10);
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var namesList = [name];
+    for (var i = 0; i < numSelected; i++) {
+        var columnName = 'player' + parseInt(i);
+        var playerName = d[columnName];
+        namesList.push(playerName);
+    }
+    console.log(namesList);
+    var lineupKey = getLineupKey(namesList);
+    nextLineup = lineupData[lineupKey];
+    drawTable();
+}
 function drawPlayerSelectionBox(rawdata) {
     var playerData = d3.nest()
         .key(function (d) {
@@ -744,18 +760,7 @@ function drawScatterPlot(csv_path) {
             .attr("cy", yMap)
             .style("fill", cMap)
             //Tooltip
-            .on("mouseover", function(d) {
-                 tooltip.transition()
-                     .duration(200)
-                     .style("opacity", 1);
-                 tooltip.html(d["nextPlayer"] + "<br/> (Defensive Efficiency: " + d["def_rating"] 
-                        + ", Offensive Efficiency: " + d["off_rating"] + ")")
-                    .style("left", (d3.event.x + 5) + "px")
-                    .style("top", (d3.event.y - 20) + "px")
-                    .style("background-color", "#D3D3D3")
-                    .style("padding", "3px")
-                    .style("border-radius", "2px");
-            })
+            .on("mouseover", circleMouseOver)
             .on("mouseout", function(d) {
                 tooltip.transition()
                     .duration(500)
