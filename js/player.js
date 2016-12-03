@@ -44,7 +44,6 @@ function updateData() {
 
     d3.csv(currentLineupFile, function(d) {
         setCurrentLineup();
-
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
@@ -188,15 +187,6 @@ function arcMouseOver(d) {
 }
 function circleMouseOver(d) {
     var name = d.nextPlayer;
-    var tooltip = d3.select("#scatterplot").append("div")
-        .attr("class", "tooltip")
-        .attr("line-height", "1")
-        .attr("font-weight", "bold")
-        .attr("padding", "12px")
-        .attr("background", "rgba(0, 0, 0, 0.8)")
-        .attr("color", "#fff")
-        .attr("border-radius", "2px")
-        .html(function(d) {return("<span>" + name +"</span>");});
     var numSelected = Object.keys(selectedPlayerMap).length;
     var namesList = [name];
     for (var i = 0; i < numSelected; i++) {
@@ -606,6 +596,7 @@ function drawScatterPlot(csv_path) {
         yDiff = height-yWidth
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
+    d3.select('#div .tooltip').selectAll('*').remove();
 
     var tooltip = d3.select("#scatterplot").append("div")
         .attr("class", "tooltip")
@@ -776,6 +767,8 @@ function drawScatterPlot(csv_path) {
             console.log(selectedPlayerMap);
             updateData();
             })
+            .on("mouseout", function(d) {
+                tooltip.transition()})
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
