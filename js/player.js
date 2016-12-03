@@ -190,10 +190,10 @@ function playerMouseOver(d) {
     for (var i = 0; i < numSelected; i++) {
         var columnName = 'player' + parseInt(i);
         var playerName = d[columnName];
-        if (namesList.indexOf(playerName) >= 0) {
+        namesList.push(playerName);
+        if (namesList.indexOf(playerName) < 0) {
             continue;
         }
-        namesList.push(playerName);
     }
     console.log(namesList);
     var lineupKey = getLineupKey(namesList);
