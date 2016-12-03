@@ -309,14 +309,14 @@ function drawRadialBarChart(csv_path) {
             return d.clinch_rating;
         });
         var barScale = d3.scale.linear()
-            .domain(extent)
+            .domain([0,10])
             .range([0, barHeight]);
 
         var keys = data.map(function(d,i) { return d.clinch_rating; });
         var numBars = keys.length;
 
         var x = d3.scale.linear()
-            .domain(extent)
+            .domain([0,10])
             .range([0, -barHeight]);
 
         var xAxis = d3.svg.axis()
@@ -343,7 +343,7 @@ function drawRadialBarChart(csv_path) {
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
             //.style("fill", function (d) { return color(d.name); })
-            .style("fill", "#996600")
+            .style("fill", "#247ba0")
             .attr("d", arc)
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
@@ -375,7 +375,7 @@ function drawRadialBarChart(csv_path) {
             .call(xAxis);
 
         // Labels
-        var labelRadius = barHeight * 1.025;
+        var labelRadius = barHeight * 1.08;
 
         var labels = svg.append("g")
             .classed("labels", true);
@@ -651,13 +651,7 @@ function drawScatterPlot(csv_path) {
             return d['off_rating'] = +d['off_rating'],
                d['def_rating'] = +d['def_rating'],
                d['num_poss']  = +d['num_poss'],
-               d['clinch_rating'] = +d['clinch_rating'],
-               sizeMax = d3.max(data, function(d) { return d.num_poss; }),
-               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
-               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
-               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
-               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
-               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
+               d['clinch_rating'] = +d['clinch_rating'];
         });
         data = removeNonSelectedPlayers(data);
         // setup x
@@ -673,15 +667,21 @@ function drawScatterPlot(csv_path) {
             yAxis = d3.svg.axis().scale(yScale).orient("left");
             
         //setup width and color
+        var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
+               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
+               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
+               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
+               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
+               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,6,10]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,7,10]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
-            colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
+            colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
             cMap = function(d){return colorScale(color(d))};
         console.log(d3.max(data, yValue))
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([0, d3.max(data, xValue)+5]);
+        xScale.domain([d3.min(data, xValue) - 5, d3.max(data, xValue)+5]);
         yScale.domain([d3.min(data, yValue)-5, d3.max(data, yValue)+5]);
 
       function make_x_gridlines() {		
