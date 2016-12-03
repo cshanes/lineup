@@ -44,7 +44,6 @@ function updateData() {
 
     d3.csv(currentLineupFile, function(d) {
         setCurrentLineup();
-
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
@@ -200,15 +199,6 @@ function arcMouseOver(d) {
 }
 function circleMouseOver(d) {
     var name = d.nextPlayer;
-    var tooltip = d3.select("#scatterplot").append("div")
-        .attr("class", "tooltip")
-        .attr("line-height", "1")
-        .attr("font-weight", "bold")
-        .attr("padding", "12px")
-        .attr("background", "rgba(0, 0, 0, 0.8)")
-        .attr("color", "#fff")
-        .attr("border-radius", "2px")
-        .html(function(d) {return("<span>" + name +"</span>");});
     var numSelected = Object.keys(selectedPlayerMap).length;
     var namesList = [name];
     for (var i = 0; i < numSelected; i++) {
@@ -498,22 +488,22 @@ function drawTable() {
                 new: null
             },
             {
-                current: currentLineup.eff_fg,
+                current: currentLineup.eff_fg_value,
                 stat: 'Effective FG%',
                 new: null
             },
             {
-                current: currentLineup.reb_rate,
+                current: currentLineup.reb_rate_value,
                 stat: 'Rebounding Rate',
                 new: null
             },
             {
-                current: currentLineup.to_rate,
+                current: currentLineup.to_rate_value,
                 stat: 'Turnover Rate',
                 new: null
             },
             {
-                current: currentLineup.ft_rate,
+                current: currentLineup.ft_rate_value,
                 stat: 'Free Throw Rate',
                 new: null
             },
@@ -584,24 +574,24 @@ function drawTable() {
                 new: nextLineup.clinch_rating
             },
             {
-                current: currentLineup.eff_fg,
+                current: currentLineup.eff_fg_value,
                 stat: 'Effective FG%',
-                new: nextLineup.eff_fg
+                new: nextLineup.eff_fg_value
             },
             {
-                current: currentLineup.reb_rate,
+                current: currentLineup.reb_rate_value,
                 stat: 'Rebounding Rate',
-                new: nextLineup.reb_rate
+                new: nextLineup.reb_rate_value
             },
             {
-                current: currentLineup.to_rate,
+                current: currentLineup.to_rate_value,
                 stat: 'Turnover Rate',
-                new: nextLineup.ro_rate
+                new: nextLineup.to_rate_value
             },
             {
-                current: currentLineup.ft_rate,
+                current: currentLineup.ft_rate_value,
                 stat: 'Free Throw Rate',
-                new: nextLineup.ft_rate
+                new: nextLineup.ft_rate_value
             },
             {
                 current: currentLineup.off_rating,
@@ -661,6 +651,7 @@ function drawScatterPlot(csv_path) {
         yDiff = height-yWidth
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
+    d3.select('div.tipsy').selectAll('*').remove();
 
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
@@ -800,7 +791,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
             .attr("x", -40)
-            .attr("y", -35)
+            .attr("y", -40)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
             .text("Offensive Efficiency");
@@ -827,6 +818,7 @@ function drawScatterPlot(csv_path) {
             console.log(selectedPlayerMap);
             updateData();
             })
+            .on("mouseover", circleMouseOver)
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
