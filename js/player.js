@@ -196,6 +196,7 @@ function playerMouseOver(d) {
     }
     console.log(namesList);
     var lineupKey = getLineupKey(namesList);
+    d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
 }
@@ -260,6 +261,7 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("y", 0)
       .attr("width", rectWidth)
       .attr("height", rectHeight)
+      .attr("class", "hvr-border-fade")
       .style("border-radius", "10px");
       
     playerContainers.append("circle")
@@ -268,7 +270,7 @@ function drawPlayerSelectionBox(rawdata) {
         })
         .attr("cy", 30)
         .attr("r", rVal)
-        // .attr("class", "hvr-grow")
+        .attr("class", "hvr-border-fade")
         .attr("fill", "url(#image)");
 }
 
@@ -342,12 +344,12 @@ function drawRadialBarChart(csv_path) {
             .data(data)
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
-            //.style("fill", function (d) { return color(d.name); })
             .style("fill", "#247ba0")
             .attr("d", arc)
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
-            .on("mouseover", playerMouseOver);
+            .on("mouseover", playerMouseOver)
+            .on("mouseout", function(d){d3.select(this).style("fill", "#247ba0")});
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -781,7 +783,7 @@ function drawScatterPlot(csv_path) {
             .attr("id", function(d) {return d.key})
             .enter().append("circle")
             .attr("stroke", "black")
-            .attr("class", "dot")
+            .attr("class", "dot hvr-box-shadow-inset")
             .attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
@@ -798,6 +800,7 @@ function drawScatterPlot(csv_path) {
             updateData();
             })
             .on("mouseover", playerMouseOver)
+            .on("mouseout", function(d){d3.select(this).style("fill", cMap)})
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
