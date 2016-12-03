@@ -161,12 +161,20 @@ function setCurrentLineup() {
     currentLineup = lineupData[lineupKey];
 }
 
-function mouseClickPlayerArc(d) {
-    var numSelected = Object.keys(selectedPlayerMap).length;
-    if (numSelected == 4) {
-        return;
+function mouseClickPlayerBox(d) {
+    var name = d.key;
+    if (name in selectedPlayerMap) {
+        delete selectedPlayerMap[name];
+        d3.select(this).selectAll('circle').classed("selected", false)
+    } else {
+        selectedPlayerMap[name] = d.values[0];
+        d3.select(this).selectAll('circle').classed("selected", true)
     }
+    console.log(selectedPlayerMap);
+    updateData();
+}
 
+function mouseClickPlayerArc(d) {
     selectedPlayerMap[d.nextPlayer] = d;
     var boxId = '#' + d.nextPlayer;
     d3.select(boxId).selectAll('circle').classed("selected", true)
@@ -179,12 +187,13 @@ function playerMouseOver(d) {
     console.log(name);
     var numSelected = Object.keys(selectedPlayerMap).length;
     var namesList = [name];
-    for (var i = 0; i <= numSelected; i++) {
+    for (var i = 0; i < numSelected; i++) {
         var columnName = 'player' + parseInt(i);
         var playerName = d[columnName];
-        if (namesList.indexOf(playerName) < 0) {
-            namesList.push(playerName);
+        if (namesList.indexOf(playerName) >= 0) {
+            continue;
         }
+        namesList.push(playerName);
     }
     console.log(namesList);
     var lineupKey = getLineupKey(namesList);
@@ -228,15 +237,10 @@ function drawPlayerSelectionBox(rawdata) {
             return "translate(" + [xVal, yVal] + ")"
         })
         .on("click", function(d) {
-            var numSelected = Object.keys(selectedPlayerMap).length;
-
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
                 d3.select(this).selectAll('circle').classed("selected", false)
             } else {
-                if (numSelected == 4) {
-                    return;
-                }
                 selectedPlayerMap[d.key] = d.values[0]
                 d3.select(this).selectAll('circle').classed("selected", true)
             }
@@ -656,11 +660,6 @@ function drawScatterPlot(csv_path) {
                colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
                colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         });
-        var playerData = d3.nest()
-        .key(function (d) {
-            return (d.player0);
-        })
-          .entries(data);
         data = removeNonSelectedPlayers(data);
         // setup x
         var xValue = function(d) { return d.def_rating ;}, // data -> value
@@ -676,15 +675,15 @@ function drawScatterPlot(csv_path) {
             
         //setup width and color
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,6.5]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,6,10]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
             cMap = function(d){return colorScale(color(d))};
-            
+        console.log(d3.max(data, yValue))
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
-        yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
+        xScale.domain([0, d3.max(data, xValue)+5]);
+        yScale.domain([d3.min(data, yValue)-5, d3.max(data, yValue)+5]);
 
       function make_x_gridlines() {		
           return d3.svg.axis()
@@ -726,8 +725,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("x", 50)
             .attr("y", 40)
-            .attr("dy", ".71em")
-            .text("Offensive Masters");
+            .attr("dy", ".71em");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -735,8 +733,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("x", 70)
             .attr("y", 40)
-            .attr("dy", ".71em")
-            .text("Superstars");
+            .attr("dy", ".71em");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -744,8 +741,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("x", 220)
             .attr("y", 350)
-            .attr("dy", ".71em")
-            .text("Room to Improve");
+            .attr("dy", ".71em");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -753,9 +749,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("x", 70)
             .attr("y", 350)
-            .attr("dy", ".71em")
-            .text("Defensive Masters");
-            
+            .attr("dy", ".71em");
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
