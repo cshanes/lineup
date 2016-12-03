@@ -161,20 +161,12 @@ function setCurrentLineup() {
     currentLineup = lineupData[lineupKey];
 }
 
-function mouseClickPlayerBox(d) {
-    var name = d.key;
-    if (name in selectedPlayerMap) {
-        delete selectedPlayerMap[name];
-        d3.select(this).selectAll('circle').classed("selected", false)
-    } else {
-        selectedPlayerMap[name] = d.values[0];
-        d3.select(this).selectAll('circle').classed("selected", true)
-    }
-    console.log(selectedPlayerMap);
-    updateData();
-}
-
 function mouseClickPlayerArc(d) {
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    if (numSelected == 4) {
+        return;
+    }
+
     selectedPlayerMap[d.nextPlayer] = d;
     var boxId = '#' + d.nextPlayer;
     d3.select(boxId).selectAll('circle').classed("selected", true)
@@ -237,10 +229,15 @@ function drawPlayerSelectionBox(rawdata) {
             return "translate(" + [xVal, yVal] + ")"
         })
         .on("click", function(d) {
+            var numSelected = Object.keys(selectedPlayerMap).length;
+
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
                 d3.select(this).selectAll('circle').classed("selected", false)
             } else {
+                if (numSelected == 4) {
+                    return;
+                }
                 selectedPlayerMap[d.key] = d.values[0]
                 d3.select(this).selectAll('circle').classed("selected", true)
             }
