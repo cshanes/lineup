@@ -10,7 +10,7 @@ var rectWidth = 50;
 var rectHeight = 50;
 var rectPadding = 30;
 var rVal= 37;
-var areaWidth = 13 * (rectWidth + rectPadding + 17);
+var areaWidth = 12 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
@@ -196,6 +196,7 @@ function playerMouseOver(d) {
     }
     console.log(namesList);
     var lineupKey = getLineupKey(namesList);
+    d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
 }
@@ -260,6 +261,7 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("y", 0)
       .attr("width", rectWidth)
       .attr("height", rectHeight)
+      .attr("class", "hvr-border-fade")
       .style("border-radius", "10px");
       
     playerContainers.append("circle")
@@ -268,7 +270,7 @@ function drawPlayerSelectionBox(rawdata) {
         })
         .attr("cy", 30)
         .attr("r", rVal)
-        // .attr("class", "hvr-grow")
+        .attr("class", "hvr-border-fade")
         .attr("fill", "url(#image)");
 }
 
@@ -342,12 +344,12 @@ function drawRadialBarChart(csv_path) {
             .data(data)
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
-            //.style("fill", function (d) { return color(d.name); })
             .style("fill", "#247ba0")
             .attr("d", arc)
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
-            .on("mouseover", playerMouseOver);
+            .on("mouseover", playerMouseOver)
+            .on("mouseout", function(d){d3.select(this).style("fill", "#247ba0")});
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -522,22 +524,22 @@ function drawTable() {
             {
                 current: null,
                 stat: 'Effective FG%',
-                new: nextLineup.eff_fg
+                new: nextLineup.eff_fg_value
             },
             {
                 current: null,
                 stat: 'Rebounding Rate',
-                new: nextLineup.reb_rate
+                new: nextLineup.reb_rate_value
             },
             {
                 current: null,
                 stat: 'Turnover Rate',
-                new: nextLineup.ro_rate
+                new: nextLineup.to_rate_value
             },
             {
                 current: null,
                 stat: 'Free Throw Rate',
-                new: nextLineup.ft_rate
+                new: nextLineup.ft_rate_value
             },
             {
                 current: null,
@@ -674,7 +676,7 @@ function drawScatterPlot(csv_path) {
                colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
                colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,7,10]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([3.5,7,10.5]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
@@ -781,7 +783,7 @@ function drawScatterPlot(csv_path) {
             .attr("id", function(d) {return d.key})
             .enter().append("circle")
             .attr("stroke", "black")
-            .attr("class", "dot")
+            .attr("class", "dot hvr-box-shadow-inset")
             .attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
@@ -798,6 +800,7 @@ function drawScatterPlot(csv_path) {
             updateData();
             })
             .on("mouseover", playerMouseOver)
+            .on("mouseout", function(d){d3.select(this).style("fill", cMap)})
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
