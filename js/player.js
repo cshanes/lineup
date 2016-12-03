@@ -6,11 +6,11 @@ var nextLineup = null;
 var containerWidth = 1300;
 var containerHeight = 120;
 
-var rectWidth = 40;
-var rectHeight = 40;
-var rectPadding = 20;
+var rectWidth = 50;
+var rectHeight = 50;
+var rectPadding = 30;
 var rVal= 30;
-var areaWidth = 16 * (rectWidth + rectPadding + 17);
+var areaWidth = 13 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
@@ -26,8 +26,8 @@ function init() {
 function updateData() {
 
     var size = Object.keys(selectedPlayerMap).length;
-    var filename = "data/fivePlayerLineups.csv";
-    var currentLineupFile = "data/fivePlayerLineups.csv";
+    var filename = "data/singlePlayerData.csv";
+    var currentLineupFile = "data/singlePlayerData.csv";
     if (size == 1) {
         currentLineupFile = "data/singlePlayerData.csv";
         filename = "data/twoPlayerLineups.csv";
@@ -273,9 +273,9 @@ function drawPlayerSelectionBox(rawdata) {
       
     playerContainers.append("circle")
         .attr("cx", function (d, i) {
-            return rectPadding + rectWidth * i +20
+            return rectPadding + rectWidth * i + 25
         })
-        .attr("cy", 20)
+        .attr("cy", 25)
         .attr("r", rVal)
         // .attr("class", "hvr-grow")
         .attr("fill", "url(#image)");
@@ -655,8 +655,8 @@ function drawScatterPlot(csv_path) {
             cMap = function(d){return colorScale(color(d))};
             
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([0, d3.max(data, xValue)+1]);
-        yScale.domain([0, d3.max(data, yValue)+1]);
+        xScale.domain([d3.min(data, xValue)-10, d3.max(data, xValue)+10]);
+        yScale.domain([d3.min(data, yValue)-10, d3.max(data, yValue)+10]);
 
       function make_x_gridlines() {		
           return d3.svg.axis()
