@@ -9,7 +9,7 @@ var containerHeight = 120;
 var rectWidth = 50;
 var rectHeight = 50;
 var rectPadding = 30;
-var rVal= 30;
+var rVal= 37;
 var areaWidth = 13 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
@@ -263,9 +263,9 @@ function drawPlayerSelectionBox(rawdata) {
       
     playerContainers.append("circle")
         .attr("cx", function (d, i) {
-            return rectPadding + rectWidth * i + 25
+            return rectPadding + rectWidth * i + 24
         })
-        .attr("cy", 25)
+        .attr("cy", 30)
         .attr("r", rVal)
         // .attr("class", "hvr-grow")
         .attr("fill", "url(#image)");
