@@ -759,13 +759,6 @@ function drawScatterPlot(csv_path) {
             .attr("cx", xMap)
             .attr("cy", yMap)
             .style("fill", cMap)
-            //Tooltip
-            .on("mouseover", circleMouseOver)
-            .on("mouseout", function(d) {
-                tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-            })
             .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
@@ -778,6 +771,17 @@ function drawScatterPlot(csv_path) {
             updateData();
             })
             .on("click", mouseClickPlayerArc);
+
+        $('svg .dot').tipsy({
+            gravity: 's',
+            html: true,
+            fade: true,
+            offset: 10,
+            title: function() {
+                var d = this.__data__;
+                return d.nextPlayer;
+            }
+        })
     })
 }
 //function drawFilters(csv_path) {
