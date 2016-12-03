@@ -676,15 +676,15 @@ function drawScatterPlot(csv_path) {
             
         //setup width and color
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,8]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,6.5]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
             cMap = function(d){return colorScale(color(d))};
             
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([d3.min(data, xValue)-10, d3.max(data, xValue)+10]);
-        yScale.domain([d3.min(data, yValue)-10, d3.max(data, yValue)+10]);
+        xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+        yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
 
       function make_x_gridlines() {		
           return d3.svg.axis()
@@ -727,7 +727,7 @@ function drawScatterPlot(csv_path) {
             .attr("x", 50)
             .attr("y", 40)
             .attr("dy", ".71em")
-            .text("Superstars");
+            .text("Offensive Masters");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -736,7 +736,7 @@ function drawScatterPlot(csv_path) {
             .attr("x", 70)
             .attr("y", 40)
             .attr("dy", ".71em")
-            .text("Offense Masters");
+            .text("Superstars");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -745,7 +745,7 @@ function drawScatterPlot(csv_path) {
             .attr("x", 220)
             .attr("y", 350)
             .attr("dy", ".71em")
-            .text("Defense Masters");
+            .text("Room to Improve");
           svg.append("text")
             .attr("opacity", 0.7)
             .attr("stroke", "none")
@@ -754,7 +754,7 @@ function drawScatterPlot(csv_path) {
             .attr("x", 70)
             .attr("y", 350)
             .attr("dy", ".71em")
-            .text("Room to Improve");
+            .text("Defensive Masters");
             
         // x-axis
         svg.append("g")
