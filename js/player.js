@@ -182,7 +182,7 @@ function mouseClickPlayerArc(d) {
     updateData();
 }
 
-function arcMouseOver(d) {
+function playerMouseOver(d) {
     var name = d.nextPlayer;
     console.log(name);
     var numSelected = Object.keys(selectedPlayerMap).length;
@@ -200,20 +200,7 @@ function arcMouseOver(d) {
     nextLineup = lineupData[lineupKey];
     drawTable();
 }
-function circleMouseOver(d) {
-    var name = d.nextPlayer;
-    var numSelected = Object.keys(selectedPlayerMap).length;
-    var namesList = [name];
-    for (var i = 0; i < numSelected; i++) {
-        var columnName = 'player' + parseInt(i);
-        var playerName = d[columnName];
-        namesList.push(playerName);
-    }
-    console.log(namesList);
-    var lineupKey = getLineupKey(namesList);
-    nextLineup = lineupData[lineupKey];
-    drawTable();
-}
+
 function drawPlayerSelectionBox(rawdata) {
     var playerData = d3.nest()
         .key(function (d) {
@@ -361,7 +348,7 @@ function drawRadialBarChart(csv_path) {
             .attr("d", arc)
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
-            .on("mouseover", arcMouseOver);
+            .on("mouseover", playerMouseOver);
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -821,7 +808,7 @@ function drawScatterPlot(csv_path) {
             console.log(selectedPlayerMap);
             updateData();
             })
-            .on("mouseover", circleMouseOver)
+            .on("mouseover", playerMouseOver)
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
