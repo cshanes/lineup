@@ -187,12 +187,11 @@ function playerMouseOver(d) {
     console.log(name);
     var numSelected = Object.keys(selectedPlayerMap).length;
     var namesList = [name];
-    for (var i = 0; i < numSelected; i++) {
+    for (var i = 0; i <= numSelected; i++) {
         var columnName = 'player' + parseInt(i);
         var playerName = d[columnName];
-        namesList.push(playerName);
         if (namesList.indexOf(playerName) < 0) {
-            continue;
+            namesList.push(playerName);
         }
     }
     console.log(namesList);
