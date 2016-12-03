@@ -99,6 +99,14 @@ function readIn() {
 function removeNonSelectedPlayers(data) {
     var numSelected = Object.keys(selectedPlayerMap).length;
     var result = data;
+
+    if (numSelected == 0) {
+        result = data.filter(function(d) {
+            d.nextPlayer = d.player0;
+            return true;
+        })
+    }
+
     if (numSelected > 0 && numSelected < 5) {
         result = data.filter(function(d) {
             var numInLineup = 0;
@@ -126,6 +134,10 @@ function removeNonSelectedPlayers(data) {
 function getNonSelectedPlayerName(data, i) {
     var numSelected = Object.keys(selectedPlayerMap).length;
     var result = parseInt(i);
+    if (numSelected == 0) {
+        return data.player0;
+    }
+
     if (numSelected > 0 && numSelected < 5) {
         for (var j = 0; j < numSelected + 1; j++) {
             var columnName = 'player' + parseInt(j);
@@ -511,8 +523,51 @@ function drawTable() {
                 new: null
             }
         ]
-    } else {
+    } else if (nextLineup != null && currentLineup == null) {
         data = [
+            {
+                current: null,
+                stat: 'Clinch Rating',
+                new: nextLineup.clinch_rating
+            },
+            {
+                current: null,
+                stat: 'Effective FG%',
+                new: nextLineup.eff_fg
+            },
+            {
+                current: null,
+                stat: 'Rebounding Rate',
+                new: nextLineup.reb_rate
+            },
+            {
+                current: null,
+                stat: 'Turnover Rate',
+                new: nextLineup.ro_rate
+            },
+            {
+                current: null,
+                stat: 'Free Throw Rate',
+                new: nextLineup.ft_rate
+            },
+            {
+                current: null,
+                stat: 'Off. Efficiency',
+                new: nextLineup.off_rating
+            },
+            {
+                current: null,
+                stat: 'Def. Efficiency',
+                new: nextLineup.def_rating
+            },
+            {
+                current: null,
+                stat: '# Possessions',
+                new: nextLineup.num_poss
+            }
+        ]
+    } else {
+            data = [
             {
                 current: currentLineup.clinch_rating,
                 stat: 'Clinch Rating',
@@ -597,10 +652,6 @@ function drawScatterPlot(csv_path) {
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
     d3.select('div.tipsy').selectAll('*').remove();
-
-    var tooltip = d3.select("#scatterplot").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 10);
 
     var svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
