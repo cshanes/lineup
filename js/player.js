@@ -190,7 +190,13 @@ function circleMouseOver(d) {
     var name = d.nextPlayer;
     var tooltip = d3.select("#scatterplot").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 10);
+        .attr("line-height", "1")
+        .attr("font-weight", "bold")
+        .attr("padding", "12px")
+        .attr("background", "rgba(0, 0, 0, 0.8)")
+        .attr("color", "#fff")
+        .attr("border-radius", "2px")
+        .html(function(d) {return("<span>" + name +"</span>");});
     var numSelected = Object.keys(selectedPlayerMap).length;
     var namesList = [name];
     for (var i = 0; i < numSelected; i++) {
