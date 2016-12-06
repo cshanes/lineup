@@ -208,6 +208,7 @@ function arcMouseOut(d){
   var name = d.nextPlayer;
   d3.select(this).style("fill", barFill);
   d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", cMap);
+  d3.selectAll('td#new.num').html("-");
 }
 
 function circleMouseOver(d) {
@@ -227,13 +228,14 @@ function circleMouseOver(d) {
     d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
-    d3.select('path#'+name+'.arc.hvr-grow').style("fill", "#6AADCA");
+    d3.select('path#'+name+'.arc').style("fill", "#6AADCA");
 }
 
 function circleMouseOut(d){
   var name = d.nextPlayer;
   d3.select(this).style("fill", cMap);
-  d3.select('path#'+name+'.arc.hvr-grow').style("fill", barFill);
+  d3.select('path#'+name+'.arc').style("fill", barFill);
+  d3.selectAll('td#new.num').html("-");
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -381,7 +383,6 @@ function drawRadialBarChart(csv_path) {
             .style("fill", barFill)
             .attr("d", arc)
             .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
-            .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
             .on("mouseover", arcMouseOver)
             .on("mouseout", arcMouseOut);
@@ -442,9 +443,9 @@ function drawTable() {
 
     // column definitions
     var columns = [
-        { head: 'Current', cl: 'num', html: ƒ('current', d3.format('.1f')) },
-        { head: 'Stat', cl: 'center', html: ƒ('stat') },
-        { head: 'New', cl: 'num', html: ƒ('new', d3.format('.1f')) },
+        { head: 'Current', cl: 'num', id: "current", html: ƒ('current', d3.format('.1f'))},
+        { head: 'Stat', cl: 'center', id:"stat", html: ƒ('stat')},
+        { head: 'New', cl: 'num', id:"new", html: ƒ('new', d3.format('.1f')) },
     ];
 
     d3.select('#table').selectAll('*').remove();
@@ -658,7 +659,8 @@ function drawTable() {
             }).enter()
             .append('td')
             .html(ƒ('html'))
-            .attr('class', ƒ('cl'));
+            .attr('class', ƒ('cl'))
+            .attr('id', ƒ('id') );
 
 }
 
