@@ -208,7 +208,7 @@ function arcMouseOut(d){
   var name = d.nextPlayer;
   d3.select(this).style("fill", barFill);
   d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", cMap);
-  d3.selectAll('td#new.num').html("-");
+  d3.selectAll('td#new.num').html("--");
 }
 
 function circleMouseOver(d) {
@@ -228,14 +228,14 @@ function circleMouseOver(d) {
     d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
-    d3.select('path#'+name+'.arc').style("fill", "#6AADCA");
+    d3.select('path#'+name).style("fill", "#6AADCA");
 }
 
 function circleMouseOut(d){
   var name = d.nextPlayer;
   d3.select(this).style("fill", cMap);
-  d3.select('path#'+name+'.arc').style("fill", barFill);
-  d3.selectAll('td#new.num').html("-");
+  d3.select('path#'+name).style("fill", barFill);
+  d3.selectAll('td#new.num').html("--");
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -652,7 +652,7 @@ function drawTable() {
                         cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
                     });
                     if (row['new'] == null && cell.head == 'New') {
-                        cell.html = '-';
+                        cell.html = '--';
                     }
                     return cell;
                 });
