@@ -237,12 +237,12 @@ function circleMouseOut(d){
 }
 
 function drawPlayerSelectionBox(rawdata) {
-    var playerData = d3.nest()
+      var playerData = d3.nest()
         .key(function (d) {
             return (d.player0);
         })
         .entries(rawdata);
-
+    
     var area = d3.select('#player_select').append('svg')
         .attr("width", containerWidth)
         .attr("height", containerHeight);
@@ -435,6 +435,7 @@ function drawRadialBarChart(csv_path) {
                 return getNonSelectedPlayerName(d, i);
             });
     });
+
 }
 
 function drawTable() {
