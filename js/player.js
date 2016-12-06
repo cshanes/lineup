@@ -15,7 +15,9 @@ var areaWidth = 12 * (rectWidth + rectPadding + 17);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
-
+var brushBar = false;
+var brushCircle = false;
+var barFill = "#247ba0";
 var lineupData = [];
 
 function init() {
@@ -182,7 +184,7 @@ function mouseClickPlayerArc(d) {
     updateData();
 }
 
-function playerMouseOver(d) {
+function arcMouseOver(d) {
     var name = d.nextPlayer;
     console.log(name);
     var numSelected = Object.keys(selectedPlayerMap).length;
@@ -199,6 +201,39 @@ function playerMouseOver(d) {
     d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
+    d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", "#6AADCA");
+}
+
+function arcMouseOut(d){
+  var name = d.nextPlayer;
+  d3.select(this).style("fill", barFill);
+  d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", cMap);
+}
+
+function circleMouseOver(d) {
+    var name = d.nextPlayer;
+    console.log(name);
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var namesList = [name];
+    for (var i = 0; i <= numSelected; i++) {
+        var columnName = 'player' + parseInt(i);
+        var playerName = d[columnName];
+        if (namesList.indexOf(playerName) < 0) {
+            namesList.push(playerName);
+        }
+    }
+    console.log(namesList);
+    var lineupKey = getLineupKey(namesList);
+    d3.select(this).style("fill", "#6AADCA");
+    nextLineup = lineupData[lineupKey];
+    drawTable();
+    d3.select('path#'+name+'.arc.hvr-grow').style("fill", "#6AADCA");
+}
+
+function circleMouseOut(d){
+  var name = d.nextPlayer;
+  d3.select(this).style("fill", cMap);
+  d3.select('path#'+name+'.arc.hvr-grow').style("fill", barFill);
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -261,7 +296,7 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("y", 0)
       .attr("width", rectWidth)
       .attr("height", rectHeight)
-      .attr("class", "hvr-border-fade")
+      .attr("class", "img-circle")
       .style("border-radius", "10px");
       
     playerContainers.append("circle")
@@ -270,7 +305,7 @@ function drawPlayerSelectionBox(rawdata) {
         })
         .attr("cy", 30)
         .attr("r", rVal)
-        .attr("class", "hvr-border-fade")
+        .attr("class", ".img-circle")
         .attr("fill", "url(#image)");
 }
 
@@ -285,7 +320,6 @@ function drawRadialBarChart(csv_path) {
         .range(["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"]);
 
     d3.select('#chart').selectAll('*').remove();
-
     var svg = d3.select('#chart').append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -344,12 +378,13 @@ function drawRadialBarChart(csv_path) {
             .data(data)
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
-            .style("fill", "#247ba0")
+            .style("fill", barFill)
             .attr("d", arc)
+            .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
             .attr("class", "arc hvr-grow")
             .on("click", mouseClickPlayerArc)
-            .on("mouseover", playerMouseOver)
-            .on("mouseout", function(d){d3.select(this).style("fill", "#247ba0")});
+            .on("mouseover", arcMouseOver)
+            .on("mouseout", arcMouseOut);
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -631,7 +666,6 @@ function drawScatterPlot(csv_path) {
   //How do we want to deal with occlusion
   //Help with tooltip issues
   
-  
     var yWidth = 360,
         xWidth = 340,
         yHeight = 40,
@@ -676,7 +710,7 @@ function drawScatterPlot(csv_path) {
                colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
                colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([3.5,7,10.5]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([5,8,11]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
@@ -780,8 +814,8 @@ function drawScatterPlot(csv_path) {
         // draw dots
         svg.selectAll(".dot")
             .data(data)
-            .attr("id", function(d) {return d.key})
             .enter().append("circle")
+            .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
             .attr("stroke", "black")
             .attr("class", "dot hvr-box-shadow-inset")
             .attr("r", rMap)  
@@ -799,8 +833,8 @@ function drawScatterPlot(csv_path) {
             console.log(selectedPlayerMap);
             updateData();
             })
-            .on("mouseover", playerMouseOver)
-            .on("mouseout", function(d){d3.select(this).style("fill", cMap)})
+            .on("mouseover", circleMouseOver)
+            .on("mouseout", circleMouseOut)
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({
