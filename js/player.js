@@ -691,13 +691,13 @@ function drawScatterPlot(csv_path) {
   //How do we want to deal with occlusion
   //Help with tooltip issues
   
-    var yWidth = 360,
-        xWidth = 340,
-        yHeight = 40,
-        xHeight = 360;
+    var yWidth = 400,
+        xWidth = 430,
+        yHeight = 50,
+        xHeight = 400;
     var tooltip;
-    var width = 400,
-        height = 400
+    var width = 500,
+        height = 440
         yDiff = height-yWidth
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
@@ -719,13 +719,13 @@ function drawScatterPlot(csv_path) {
         var xValue = function(d) { return d.def_rating ;}, // data -> value
             xScale = d3.scale.linear().range([yHeight, xWidth]), // value -> display
             xMap = function(d) {return xScale(xValue(d));}, // data -> display
-            xAxis = d3.svg.axis().orient("bottom").scale(xScale);
+            xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(8);
 
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
             yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
             yMap = function(d) { return yScale(yValue(d));}, // data -> display
-            yAxis = d3.svg.axis().scale(yScale).orient("left");
+            yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(8);
             
         //setup width and color
         var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
@@ -742,8 +742,10 @@ function drawScatterPlot(csv_path) {
             cMap = function(d){return colorScale(color(d))};
         console.log(d3.max(data, yValue))
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([d3.min(data, xValue) - 5, d3.max(data, xValue)+5]);
-        yScale.domain([d3.min(data, yValue)-5, d3.max(data, yValue)+5]);
+        xChange = (d3.max(data, xValue) - d3.min(data, xValue))/8
+        yChange = (d3.max(data, yValue) - d3.min(data, yValue))/8
+        xScale.domain([d3.min(data, xValue)-xChange, d3.max(data, xValue)+xChange]);
+        yScale.domain([d3.min(data, yValue)-yChange, d3.max(data, yValue)+yChange]);
 
       function make_x_gridlines() {		
           return d3.svg.axis()
@@ -774,42 +776,11 @@ function drawScatterPlot(csv_path) {
             .attr("fill", "none")
             .attr("opacity", 0.7)
             .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + yWidth/2 + "," + 0 + ")")
+            .attr("transform", "translate(" + 230 + "," + 0 + ")")
             .call(make_y_gridlines()
               .tickSize(1)
               .tickFormat(""))
-            .style("stroke-dasharray","5,5")
-            .append("text")
-            .attr("stroke", "none")
-            .attr("fill", "black")
-            .attr("class", "label")
-            .attr("x", 50)
-            .attr("y", 40)
-            .attr("dy", ".71em");
-          svg.append("text")
-            .attr("opacity", 0.7)
-            .attr("stroke", "none")
-            .attr("fill", "black")
-            .attr("class", "label")
-            .attr("x", 70)
-            .attr("y", 40)
-            .attr("dy", ".71em");
-          svg.append("text")
-            .attr("opacity", 0.7)
-            .attr("stroke", "none")
-            .attr("fill", "black")
-            .attr("class", "label")
-            .attr("x", 220)
-            .attr("y", 350)
-            .attr("dy", ".71em");
-          svg.append("text")
-            .attr("opacity", 0.7)
-            .attr("stroke", "none")
-            .attr("fill", "black")
-            .attr("class", "label")
-            .attr("x", 70)
-            .attr("y", 350)
-            .attr("dy", ".71em");
+            .style("stroke-dasharray","5,5");
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
@@ -831,7 +802,7 @@ function drawScatterPlot(csv_path) {
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
             .attr("x", -40)
-            .attr("y", -40)
+            .attr("y", -45)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
             .text("Offensive Efficiency");
