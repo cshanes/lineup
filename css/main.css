@@ -1,3 +1,7 @@
+body {
+    background-color: #ebebeb !important;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -8,14 +12,19 @@
   border: 1px solid black ;
 }
 
+#player_select {
+    padding-top:10px;
+}
+
 .player-box {
   font-size: 10px;
   cursor: pointer;
 }
 
 .selected {
-  stroke: #247ba0;
-  stroke-width: 3px;
+    border-style: solid;
+    border-color: #247ba0;
+    border-width: 5px;
 }
 
 .arc {
@@ -37,4 +46,18 @@ tooltip {
     background: #247ba0;	
     border-radius: 8px;			
     pointer-events: none;			
+}
+
+.dash-container {
+    padding-top:10px;
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    border-radius: 10px;
+    background-color: #ffffff;
+
+    box-shadow: 5px 5px 5px #b9b9b9;
+
+    text-align: center;
 }

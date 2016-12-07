@@ -4,7 +4,7 @@ var currentLineup = null;
 var nextLineup = null;
 
 var containerWidth = 1300;
-var containerHeight = 120;
+var containerHeight = 100;
 
 var rectWidth = 50;
 var rectHeight = 50;
@@ -51,7 +51,6 @@ function updateData() {
         drawScatterPlot(filename);
         drawTable();
         updatePlayerSelectionBox(filename);
- //       drawFilters(filename);
     });
 
 }
@@ -112,6 +111,8 @@ function updatePlayerSelectionBox(file) {
                     for (var k = 0; k < numSelected + 1; k++) {
                         var columnName = 'player' + parseInt(k);
                         var playerName = data[i][columnName];
+                        var boxId = '#' + playerName;
+                        d3.select(boxId).classed("disabled", false)
                         if (playerName in selectedPlayerMap) {
                             numInLineup++;
                         } else {
@@ -134,10 +135,12 @@ function updatePlayerSelectionBox(file) {
             var player = playerData[i].key;
             if (!(player in nextPlayers)) {
                 var boxId = '#' + player;
-                var playerSelected = d3.select(boxId).selectAll('circle').classed("selected");
+                var playerSelected = d3.select(boxId).selectAll('img').classed("selected");
                 if (!playerSelected) {
                     console.log("disabling: " + player)
                     d3.select(boxId).classed("disabled", true)
+                } else {
+                    d3.select(boxId).classed("disabled", false)
                 }
 
             }
@@ -219,7 +222,11 @@ function mouseClickPlayerArc(d) {
 
     selectedPlayerMap[d.nextPlayer] = d;
     var boxId = '#' + d.nextPlayer;
-    d3.select(boxId).selectAll('circle').classed("selected", true)
+    var disabled = d3.select(boxId).classed("disabled");
+    if (disabled) {
+        return;
+    }
+    d3.select(boxId).selectAll('img').classed("selected", true)
     console.log(selectedPlayerMap);
     updateData();
 }
@@ -284,30 +291,17 @@ function drawPlayerSelectionBox(rawdata) {
             return (d.player0);
         })
         .entries(rawdata);
+
+    var row = d3.select('#player_select').append('div').attr('class', 'row');
     
-    var area = d3.select('#player_select').append('svg')
-        .attr("width", containerWidth)
-        .attr("height", containerHeight);
-
-    var container = area.append("g");
-
-    // player box
-    container.append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", playerBoxWidth)
-        .attr("height", playerBoxHeight)
-        .attr("stroke", "#D3D3D3")
-        .attr("fill", "#D3D3D3");
-
-    var playerContainers = area.selectAll('.bar')
+    var playerContainers = row.selectAll('.player-box')
         .data(playerData)
         .enter()
-        .append("g")
+        .append("div")
         .attr("id", function(d) {
             return d.key
         })
-        .attr("class", "player-box")
+        .attr("class", "player-box col-md-1 hvr-underline-from-center")
         .attr("transform", function (d, i) {
             xVal = i * rectWidth + rectPadding;
             yVal = 15;
@@ -318,42 +312,27 @@ function drawPlayerSelectionBox(rawdata) {
 
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
-                d3.select(this).selectAll('circle').classed("selected", false)
+                d3.select(this).selectAll('img').classed("selected", false)
             } else {
                 if (numSelected >= 4) {
                     return;
                 }
+                var disabled = d3.select(this).classed("disabled");
+                if (disabled) {
+                    return;
+                }
                 selectedPlayerMap[d.key] = d.values[0]
-                d3.select(this).selectAll('circle').classed("selected", true)
+                d3.select(this).selectAll('img').classed("selected", true)
             }
             console.log(selectedPlayerMap);
             updateData();
         })
 
-    playerContainers.append("text")
-      .text(function(d){ return d.key; })
-      .attr("text-anchor", "middle")
-      .attr("x", function(d,i){return 20 + (rectPadding + (rectWidth * i))})
-      .attr("y", 60)
-      .attr("font-family", "sans-serif");
-    
-    playerContainers.append("image")
-      .attr("xlink:href", function(d) {return ("js/photos/" +  d.key + ".jpeg"); })
-      .attr("x", function(d,i){return (rectPadding + (rectWidth * i))})
-      .attr("y", 0)
-      .attr("width", rectWidth)
-      .attr("height", rectHeight)
-      .attr("class", "img-circle")
-      .style("border-radius", "10px");
-      
-    playerContainers.append("circle")
-        .attr("cx", function (d, i) {
-            return rectPadding + rectWidth * i + 24
-        })
-        .attr("cy", 30)
-        .attr("r", rVal)
-        .attr("class", ".img-circle")
-        .attr("fill", "url(#image)");
+    playerContainers.append("img")
+        .attr('src', function(d) {return ("js/photos/" +  d.key + ".jpeg");})
+        .attr("class", "img-circle img-responsive");
+    playerContainers.append("p")
+        .text(function(d){ return d.key; });
 }
 
 function drawRadialBarChart(csv_path) {
