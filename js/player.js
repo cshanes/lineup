@@ -702,7 +702,7 @@ function drawScatterPlot(csv_path) {
   //How do we want to deal with occlusion
   //Help with tooltip issues
   
-    var yWidth = 430,
+    var yWidth = 420,
         xWidth = 450,
         yHeight = 50,
         xHeight = 400;
@@ -718,12 +718,18 @@ function drawScatterPlot(csv_path) {
         .attr("width", width)
         .attr("height", height)
         .append("g");
+    var colorMax;
+    var colorMin;
+    var colorMean;
     d3.csv(csv_path, function(error, data) {
         data.map(function(d) {
             return d['off_rating'] = +d['off_rating'],
                d['def_rating'] = +d['def_rating'],
                d['num_poss']  = +d['num_poss'],
-               d['clinch_rating'] = +d['clinch_rating'];
+               d['clinch_rating'] = +d['clinch_rating'],
+               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
+               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
+               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         });
         data = removeNonSelectedPlayers(data);
         // setup x
@@ -735,16 +741,13 @@ function drawScatterPlot(csv_path) {
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
             yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
-            yMap = function(d) { return yScale(yValue(d))-30;}, // data -> display
+            yMap = function(d) { return yScale(yValue(d))-20;}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(8);
             
         //setup width and color
         var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
                sizeMin = d3.min(data, function(d) { return d.num_poss; }),
-               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
-               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
-               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
-               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
+               sizeMean = d3.mean(data, function(d) { return d.num_poss; });
         var size = function(d){return d.num_poss;},
             rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([5,8,11]),
             rMap = function(d){return rscale(size(d));};
@@ -787,7 +790,7 @@ function drawScatterPlot(csv_path) {
             .attr("fill", "none")
             .attr("opacity", 0.7)
             .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + (width)/2 + "," + -30 + ")")
+            .attr("transform", "translate(" + (width)/2 + "," + -20 + ")")
             .call(make_y_gridlines()
               .tickSize(1)
               .tickFormat(""))
@@ -795,7 +798,7 @@ function drawScatterPlot(csv_path) {
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate("+0+"," + xHeight + ")")
+            .attr("transform", "translate("+0+"," + (xHeight-10) + ")")
             .call(xAxis)
             .append("text")
             .attr("class", "label")
