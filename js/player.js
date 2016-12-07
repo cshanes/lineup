@@ -708,7 +708,7 @@ function drawScatterPlot(csv_path) {
     var yWidth = 420,
         xWidth = 450,
         yHeight = 50,
-        xHeight = 400;
+        xHeight = 390;
     var tooltip;
     var width = 500,
         height = 440
@@ -744,9 +744,11 @@ function drawScatterPlot(csv_path) {
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
             yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
-            yMap = function(d) { return yScale(yValue(d))-20;}, // data -> display
+            yMap = function(d) { return yScale(yValue(d))-30;}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(8);
-            
+            console.log("all the points", yAxis.scale().ticks(yAxis.ticks()[0]));
+
+        
         //setup width and color
         var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
                sizeMin = d3.min(data, function(d) { return d.num_poss; }),
@@ -765,10 +767,11 @@ function drawScatterPlot(csv_path) {
         yScale.domain([d3.min(data, yValue)-yChange, d3.max(data, yValue)+yChange]);
 
       function make_x_gridlines() {		
-          return d3.svg.axis()
+          axis = d3.svg.axis()
               .scale(xScale)
               .orient("bottom")
-              .ticks(5)
+              .ticks(5);
+          return axis
           }
       function make_y_gridlines() {		
           return d3.svg.axis()
@@ -777,7 +780,7 @@ function drawScatterPlot(csv_path) {
             .ticks(5)
           }
         //adding X gridline
-        svg.append("g")		
+        xGrid = svg.append("g")		
             .attr("stroke", "grey")
             .attr("fill", "none")
             .attr("opacity", 0.7)
@@ -787,13 +790,14 @@ function drawScatterPlot(csv_path) {
                 .tickSize(1)
                 .tickFormat(""))
             .style("stroke-dasharray","5,5");
+
         // add the Y gridlines
         svg.append("g")	
             .attr("stroke", "grey")
             .attr("fill", "none")
             .attr("opacity", 0.7)
             .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + (width)/2 + "," + -20 + ")")
+            .attr("transform", "translate(" + (width)/2 + "," + -30 + ")")
             .call(make_y_gridlines()
               .tickSize(1)
               .tickFormat(""))
@@ -801,7 +805,7 @@ function drawScatterPlot(csv_path) {
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate("+0+"," + (xHeight-10) + ")")
+            .attr("transform", "translate("+0+"," + (xHeight) + ")")
             .call(xAxis)
             .append("text")
             .attr("class", "label")
@@ -809,7 +813,6 @@ function drawScatterPlot(csv_path) {
             .attr("y", 30)
             .style("text-anchor", "end")
             .text("Defensive Efficiency");
-
         // y-axis
         svg.append("g")
             .attr("class", "y axis")
