@@ -27,6 +27,18 @@ body {
     border-width: 5px;
 }
 
+.mouseovered {
+    border-style: none none solid none;
+    border-width: 5px;
+    border-color: #247ba0;
+}
+
+.mouseout {
+    border-style: none none solid none;
+    border-width: 5px;
+    border-color: #ffffff;
+}
+
 .arc {
   cursor: pointer;
 }

@@ -247,13 +247,19 @@ function arcMouseOver(d) {
     nextLineup = lineupData[lineupKey];
     drawTable();
     d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", "#6AADCA");
+    var boxId = '#' + name;
+    d3.select(boxId).classed('mouseovered', true);
+    d3.select(boxId).classed('mouseout', false);
 }
 
-function arcMouseOut(d){
-  var name = d.nextPlayer;
-  d3.select(this).style("fill", barFill);
-  d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", cMap);
-  d3.selectAll('td#new.num').html("--");
+function arcMouseOut(d) {
+    var name = d.nextPlayer;
+    d3.select(this).style("fill", barFill);
+    d3.select('circle#' + name + '.dot.hvr-box-shadow-inset').style("fill", cMap);
+    var boxId = '#' + name;
+    d3.select(boxId).classed('mouseovered', false);
+    d3.select(boxId).classed('mouseout', true);
+    d3.selectAll('td#new.num').html("--");
 }
 
 function circleMouseOver(d) {
@@ -274,13 +280,18 @@ function circleMouseOver(d) {
     nextLineup = lineupData[lineupKey];
     drawTable();
     d3.select('path#'+name).style("fill", "#6AADCA");
+    var boxId = '#' + name;
+    d3.select(boxId).classed('mouseovered', true);
+    d3.select(boxId).classed('mouseout', false);
 }
 
-function circleMouseOut(d){
-  var name = d.nextPlayer;
-  d3.select(this).style("fill", cMap);
-  d3.select('path#'+name).style("fill", barFill);
-  d3.selectAll('td#new.num').html("--");
+function circleMouseOut(d) {
+    var name = d.nextPlayer;
+    d3.select(this).style("fill", cMap);
+    d3.select('path#' + name).style("fill", barFill);
+    d3.selectAll('td#new.num').html("--");
+    d3.select(boxId).classed('mouseovered', false);
+    d3.select(boxId).classed('mouseout', true);
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -299,7 +310,7 @@ function drawPlayerSelectionBox(rawdata) {
         .attr("id", function(d) {
             return d.key
         })
-        .attr("class", "player-box col-md-1 hvr-underline-from-center")
+        .attr("class", "player-box col-md-1 hvr-underline-from-center mouseout")
         .attr("transform", function (d, i) {
             xVal = i * rectWidth + rectPadding;
             yVal = 15;
