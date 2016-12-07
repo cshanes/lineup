@@ -285,6 +285,7 @@ function circleMouseOver(d) {
     var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', true);
     d3.select(boxId).classed('mouseout', false);
+        var circle = d3.select('circle#' + name + '.dot.hvr-box-shadow-inset')
 }
 
 function circleMouseOut(d) {
@@ -726,7 +727,7 @@ function drawScatterPlot(csv_path) {
     var tooltip;
     var width = 500,
         height = 440
-        yDiff = height-yWidth
+        yDiff = height-yWidth+20
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
     d3.select('div.tipsy').selectAll('*').remove();
@@ -793,29 +794,6 @@ function drawScatterPlot(csv_path) {
             .orient("left")
             .ticks(5)
           }
-        //adding X gridline
-        xGrid = svg.append("g")		
-            .attr("stroke", "grey")
-            .attr("fill", "none")
-            .attr("opacity", 0.7)
-            .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + 0 + "," + height/2 + ")")
-            .call(make_x_gridlines()
-                .tickSize(1)
-                .tickFormat(""))
-            .style("stroke-dasharray","5,5");
-
-        // add the Y gridlines
-        svg.append("g")	
-            .attr("stroke", "grey")
-            .attr("fill", "none")
-            .attr("opacity", 0.7)
-            .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + (width)/2 + "," + -30 + ")")
-            .call(make_y_gridlines()
-              .tickSize(1)
-              .tickFormat(""))
-            .style("stroke-dasharray","5,5");
         // x-axis
         svg.append("g")
             .attr("class", "x axis")
