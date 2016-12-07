@@ -292,6 +292,7 @@ function circleMouseOut(d) {
     d3.select(this).style("fill", cMap);
     d3.select('path#' + name).style("fill", barFill);
     d3.selectAll('td#new.num').html("--");
+    var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', false);
     d3.select(boxId).classed('mouseout', true);
 }
