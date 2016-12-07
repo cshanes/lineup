@@ -691,8 +691,8 @@ function drawScatterPlot(csv_path) {
   //How do we want to deal with occlusion
   //Help with tooltip issues
   
-    var yWidth = 400,
-        xWidth = 430,
+    var yWidth = 430,
+        xWidth = 450,
         yHeight = 50,
         xHeight = 400;
     var tooltip;
@@ -724,7 +724,7 @@ function drawScatterPlot(csv_path) {
         // setup y
         var yValue = function(d) { return d.off_rating;}, // data -> value
             yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
-            yMap = function(d) { return yScale(yValue(d));}, // data -> display
+            yMap = function(d) { return yScale(yValue(d))-30;}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(8);
             
         //setup width and color
@@ -742,8 +742,8 @@ function drawScatterPlot(csv_path) {
             cMap = function(d){return colorScale(color(d))};
         console.log(d3.max(data, yValue))
         // don't want dots overlapping axis, so add in buffer to data domain
-        xChange = (d3.max(data, xValue) - d3.min(data, xValue))/8
-        yChange = (d3.max(data, yValue) - d3.min(data, yValue))/8
+        xChange = (d3.max(data, xValue) - d3.min(data, xValue))/10
+        yChange = (d3.max(data, yValue) - d3.min(data, yValue))/10
         xScale.domain([d3.min(data, xValue)-xChange, d3.max(data, xValue)+xChange]);
         yScale.domain([d3.min(data, yValue)-yChange, d3.max(data, yValue)+yChange]);
 
@@ -796,7 +796,7 @@ function drawScatterPlot(csv_path) {
         // y-axis
         svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate("+yHeight+","+0+")")
+            .attr("transform", "translate("+yHeight+","+-30+")")
             .call(yAxis)
             .append("text")
             .attr("class", "label")
