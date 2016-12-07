@@ -334,8 +334,8 @@ function drawPlayerSelectionBox(rawdata) {
 }
 
 function drawRadialBarChart(csv_path) {
-    var width = 400,
-        height = 400,
+    var width = 500,
+        height = 430,
         barHeight = height / 2 - 40;
 
     var formatNumber = d3.format("s");
