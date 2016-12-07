@@ -776,7 +776,7 @@ function drawScatterPlot(csv_path) {
             .attr("fill", "none")
             .attr("opacity", 0.7)
             .attr("rendering", "crispEdges")
-            .attr("transform", "translate(" + 230 + "," + 0 + ")")
+            .attr("transform", "translate(" + (width)/2 + "," + -30 + ")")
             .call(make_y_gridlines()
               .tickSize(1)
               .tickFormat(""))
