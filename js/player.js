@@ -292,7 +292,7 @@ function drawPlayerSelectionBox(rawdata) {
         })
         .entries(rawdata);
 
-    var row = d3.select('#player_select').append('div').attr('class', 'row');
+    var row = d3.select('#player_select').append('div').attr('class', 'row dash-container');
     
     var playerContainers = row.selectAll('.player-box')
         .data(playerData)
