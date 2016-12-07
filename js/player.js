@@ -225,6 +225,8 @@ function mouseClickPlayerArc(d) {
         return;
     }
     d3.select(boxId).selectAll('img').classed("selected", true)
+    d3.select(boxId).classed('mouseovered', false);
+    d3.select(boxId).classed('mouseout', true);
     console.log(selectedPlayerMap);
     updateData();
 }
