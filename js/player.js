@@ -297,6 +297,18 @@ function circleMouseOut(d) {
     d3.select(boxId).classed('mouseout', true);
 }
 
+function playerBoxMouseOver(d) {
+    var name = d.key;
+    d3.select('path#'+name).style("fill", "#6AADCA");
+    d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", "#6AADCA");
+}
+
+function playerBoxMouseOut(d) {
+    var name = d.key;
+    d3.select('path#' + name).style("fill", barFill);
+    d3.select('circle#' + name + '.dot.hvr-box-shadow-inset').style("fill", cMap);
+}
+
 function drawPlayerSelectionBox(rawdata) {
     playerData = d3.nest()
         .key(function (d) {
@@ -339,6 +351,8 @@ function drawPlayerSelectionBox(rawdata) {
             console.log(selectedPlayerMap);
             updateData();
         })
+        .on("mouseover", playerBoxMouseOver)
+        .on("mouseout", playerBoxMouseOut)
 
     playerContainers.append("img")
         .attr('src', function(d) {return ("js/photos/" +  d.key + ".jpeg");})
