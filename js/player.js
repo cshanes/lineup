@@ -103,21 +103,19 @@ function updatePlayerSelectionBox(file) {
         var numSelected = Object.keys(selectedPlayerMap).length;
 
         var nextPlayers = {};
-        if (numSelected > 0 && numSelected < 5) {
+        if (numSelected < 5) {
             for (var i = 0; i < data.length; i++) {
-                for (var j = 0; j < numSelected + 1; j++) {
-                    var numInLineup = 0;
-                    var nextPlayer = '';
-                    for (var k = 0; k < numSelected + 1; k++) {
-                        var columnName = 'player' + parseInt(k);
-                        var playerName = data[i][columnName];
-                        var boxId = '#' + playerName;
-                        d3.select(boxId).classed("disabled", false)
-                        if (playerName in selectedPlayerMap) {
-                            numInLineup++;
-                        } else {
-                            nextPlayer = playerName;
-                        }
+                var numInLineup = 0;
+                var nextPlayer = '';
+                for (var k = 0; k < numSelected + 1; k++) {
+                    var columnName = 'player' + parseInt(k);
+                    var playerName = data[i][columnName];
+                    var boxId = '#' + playerName;
+                    d3.select(boxId).classed("disabled", false)
+                    if (playerName in selectedPlayerMap) {
+                        numInLineup++;
+                    } else {
+                        nextPlayer = playerName;
                     }
                 }
                 if (numInLineup == numSelected) {
