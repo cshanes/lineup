@@ -22,7 +22,12 @@
   cursor: pointer;
 }
 
-tooltip {	
+.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+tooltip {
     position: absolute;			
     text-align: center;			
     width: 60px;					

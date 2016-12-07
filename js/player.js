@@ -15,6 +15,7 @@ var areaWidth = 12 * (rectWidth + rectPadding + 17);
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
+var playerData;
 var brushBar = false;
 var brushCircle = false;
 var barFill = "#247ba0";
@@ -49,6 +50,7 @@ function updateData() {
         drawRadialBarChart(filename);
         drawScatterPlot(filename);
         drawTable();
+        updatePlayerSelectionBox(filename);
  //       drawFilters(filename);
     });
 
@@ -94,6 +96,52 @@ function readIn() {
     });
     d3.csv('data/fivePlayerLineups.csv', function(data) {
         setLineupData(data, 5);
+    });
+}
+
+function updatePlayerSelectionBox(file) {
+    d3.csv(file, function(error, data) {
+        var numSelected = Object.keys(selectedPlayerMap).length;
+
+        var nextPlayers = {};
+        if (numSelected > 0 && numSelected < 5) {
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < numSelected + 1; j++) {
+                    var numInLineup = 0;
+                    var nextPlayer = '';
+                    for (var k = 0; k < numSelected + 1; k++) {
+                        var columnName = 'player' + parseInt(k);
+                        var playerName = data[i][columnName];
+                        if (playerName in selectedPlayerMap) {
+                            numInLineup++;
+                        } else {
+                            nextPlayer = playerName;
+                        }
+                    }
+                }
+                if (numInLineup == numSelected) {
+                    nextPlayers[nextPlayer] = true;
+                }
+            }
+        }
+
+        var nextPlayersLength = Object.keys(nextPlayers).length;
+        if (nextPlayersLength == 0) {
+            return;
+        }
+
+        for (var i = 0; i < playerData.length; i++) {
+            var player = playerData[i].key;
+            if (!(player in nextPlayers)) {
+                var boxId = '#' + player;
+                var playerSelected = d3.select(boxId).selectAll('circle').classed("selected");
+                if (!playerSelected) {
+                    console.log("disabling: " + player)
+                    d3.select(boxId).classed("disabled", true)
+                }
+
+            }
+        }
     });
 }
 
@@ -163,20 +211,12 @@ function setCurrentLineup() {
     currentLineup = lineupData[lineupKey];
 }
 
-function mouseClickPlayerBox(d) {
-    var name = d.key;
-    if (name in selectedPlayerMap) {
-        delete selectedPlayerMap[name];
-        d3.select(this).selectAll('circle').classed("selected", false)
-    } else {
-        selectedPlayerMap[name] = d.values[0];
-        d3.select(this).selectAll('circle').classed("selected", true)
-    }
-    console.log(selectedPlayerMap);
-    updateData();
-}
-
 function mouseClickPlayerArc(d) {
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    if (numSelected >= 4) {
+        return;
+    }
+
     selectedPlayerMap[d.nextPlayer] = d;
     var boxId = '#' + d.nextPlayer;
     d3.select(boxId).selectAll('circle').classed("selected", true)
@@ -239,7 +279,7 @@ function circleMouseOut(d){
 }
 
 function drawPlayerSelectionBox(rawdata) {
-      var playerData = d3.nest()
+    playerData = d3.nest()
         .key(function (d) {
             return (d.player0);
         })
@@ -274,10 +314,15 @@ function drawPlayerSelectionBox(rawdata) {
             return "translate(" + [xVal, yVal] + ")"
         })
         .on("click", function(d) {
+            var numSelected = Object.keys(selectedPlayerMap).length;
+
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
                 d3.select(this).selectAll('circle').classed("selected", false)
             } else {
+                if (numSelected >= 4) {
+                    return;
+                }
                 selectedPlayerMap[d.key] = d.values[0]
                 d3.select(this).selectAll('circle').classed("selected", true)
             }
