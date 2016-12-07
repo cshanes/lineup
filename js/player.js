@@ -10,12 +10,15 @@ var rectWidth = 50;
 var rectHeight = 50;
 var rectPadding = 30;
 var rVal= 37;
-var areaWidth = 13 * (rectWidth + rectPadding + 17);
+var areaWidth = 12 * (rectWidth + rectPadding + 17);
 
 var playerBoxWidth = areaWidth;
 var playerBoxHeight = 100;
 
 var playerData;
+var brushBar = false;
+var brushCircle = false;
+var barFill = "#247ba0";
 var lineupData = [];
 
 function init() {
@@ -221,7 +224,7 @@ function mouseClickPlayerArc(d) {
     updateData();
 }
 
-function playerMouseOver(d) {
+function arcMouseOver(d) {
     var name = d.nextPlayer;
     console.log(name);
     var numSelected = Object.keys(selectedPlayerMap).length;
@@ -235,8 +238,44 @@ function playerMouseOver(d) {
     }
     console.log(namesList);
     var lineupKey = getLineupKey(namesList);
+    d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
+    d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", "#6AADCA");
+}
+
+function arcMouseOut(d){
+  var name = d.nextPlayer;
+  d3.select(this).style("fill", barFill);
+  d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", cMap);
+  d3.selectAll('td#new.num').html("--");
+}
+
+function circleMouseOver(d) {
+    var name = d.nextPlayer;
+    console.log(name);
+    var numSelected = Object.keys(selectedPlayerMap).length;
+    var namesList = [name];
+    for (var i = 0; i <= numSelected; i++) {
+        var columnName = 'player' + parseInt(i);
+        var playerName = d[columnName];
+        if (namesList.indexOf(playerName) < 0) {
+            namesList.push(playerName);
+        }
+    }
+    console.log(namesList);
+    var lineupKey = getLineupKey(namesList);
+    d3.select(this).style("fill", "#6AADCA");
+    nextLineup = lineupData[lineupKey];
+    drawTable();
+    d3.select('path#'+name).style("fill", "#6AADCA");
+}
+
+function circleMouseOut(d){
+  var name = d.nextPlayer;
+  d3.select(this).style("fill", cMap);
+  d3.select('path#'+name).style("fill", barFill);
+  d3.selectAll('td#new.num').html("--");
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -245,7 +284,7 @@ function drawPlayerSelectionBox(rawdata) {
             return (d.player0);
         })
         .entries(rawdata);
-
+    
     var area = d3.select('#player_select').append('svg')
         .attr("width", containerWidth)
         .attr("height", containerHeight);
@@ -304,6 +343,7 @@ function drawPlayerSelectionBox(rawdata) {
       .attr("y", 0)
       .attr("width", rectWidth)
       .attr("height", rectHeight)
+      .attr("class", "img-circle")
       .style("border-radius", "10px");
       
     playerContainers.append("circle")
@@ -312,7 +352,7 @@ function drawPlayerSelectionBox(rawdata) {
         })
         .attr("cy", 30)
         .attr("r", rVal)
-        // .attr("class", "hvr-grow")
+        .attr("class", ".img-circle")
         .attr("fill", "url(#image)");
 }
 
@@ -327,7 +367,6 @@ function drawRadialBarChart(csv_path) {
         .range(["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"]);
 
     d3.select('#chart').selectAll('*').remove();
-
     var svg = d3.select('#chart').append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -353,14 +392,14 @@ function drawRadialBarChart(csv_path) {
             return d.clinch_rating;
         });
         var barScale = d3.scale.linear()
-            .domain(extent)
+            .domain([0,10])
             .range([0, barHeight]);
 
         var keys = data.map(function(d,i) { return d.clinch_rating; });
         var numBars = keys.length;
 
         var x = d3.scale.linear()
-            .domain(extent)
+            .domain([0,10])
             .range([0, -barHeight]);
 
         var xAxis = d3.svg.axis()
@@ -386,12 +425,12 @@ function drawRadialBarChart(csv_path) {
             .data(data)
             .enter().append("path")
             .each(function(d) { d.outerRadius = 0; })
-            //.style("fill", function (d) { return color(d.name); })
-            .style("fill", "#996600")
+            .style("fill", barFill)
             .attr("d", arc)
-            .attr("class", "arc hvr-grow")
+            .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
             .on("click", mouseClickPlayerArc)
-            .on("mouseover", playerMouseOver);
+            .on("mouseover", arcMouseOver)
+            .on("mouseout", arcMouseOut);
 
         segments.transition().ease("elastic").duration(1000).delay(function(d,i) {return (25-i)*10;})
             .attrTween("d", function(d,index) {
@@ -419,7 +458,7 @@ function drawRadialBarChart(csv_path) {
             .call(xAxis);
 
         // Labels
-        var labelRadius = barHeight * 1.025;
+        var labelRadius = barHeight * 1.08;
 
         var labels = svg.append("g")
             .classed("labels", true);
@@ -442,15 +481,16 @@ function drawRadialBarChart(csv_path) {
                 return getNonSelectedPlayerName(d, i);
             });
     });
+
 }
 
 function drawTable() {
 
     // column definitions
     var columns = [
-        { head: 'Current', cl: 'num', html: ƒ('current', d3.format('.1f')) },
-        { head: 'Stat', cl: 'center', html: ƒ('stat') },
-        { head: 'New', cl: 'num', html: ƒ('new', d3.format('.1f')) },
+        { head: 'Current', cl: 'num', id: "current", html: ƒ('current', d3.format('.1f'))},
+        { head: 'Stat', cl: 'center', id:"stat", html: ƒ('stat')},
+        { head: 'New', cl: 'num', id:"new", html: ƒ('new', d3.format('.1f')) },
     ];
 
     d3.select('#table').selectAll('*').remove();
@@ -566,22 +606,22 @@ function drawTable() {
             {
                 current: null,
                 stat: 'Effective FG%',
-                new: nextLineup.eff_fg
+                new: nextLineup.eff_fg_value
             },
             {
                 current: null,
                 stat: 'Rebounding Rate',
-                new: nextLineup.reb_rate
+                new: nextLineup.reb_rate_value
             },
             {
                 current: null,
                 stat: 'Turnover Rate',
-                new: nextLineup.ro_rate
+                new: nextLineup.to_rate_value
             },
             {
                 current: null,
                 stat: 'Free Throw Rate',
-                new: nextLineup.ft_rate
+                new: nextLineup.ft_rate_value
             },
             {
                 current: null,
@@ -657,14 +697,15 @@ function drawTable() {
                         cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
                     });
                     if (row['new'] == null && cell.head == 'New') {
-                        cell.html = '-';
+                        cell.html = '--';
                     }
                     return cell;
                 });
             }).enter()
             .append('td')
             .html(ƒ('html'))
-            .attr('class', ƒ('cl'));
+            .attr('class', ƒ('cl'))
+            .attr('id', ƒ('id') );
 
 }
 
@@ -672,7 +713,6 @@ function drawScatterPlot(csv_path) {
   
   //How do we want to deal with occlusion
   //Help with tooltip issues
-  
   
     var yWidth = 360,
         xWidth = 340,
@@ -695,13 +735,7 @@ function drawScatterPlot(csv_path) {
             return d['off_rating'] = +d['off_rating'],
                d['def_rating'] = +d['def_rating'],
                d['num_poss']  = +d['num_poss'],
-               d['clinch_rating'] = +d['clinch_rating'],
-               sizeMax = d3.max(data, function(d) { return d.num_poss; }),
-               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
-               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
-               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
-               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
-               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
+               d['clinch_rating'] = +d['clinch_rating'];
         });
         data = removeNonSelectedPlayers(data);
         // setup x
@@ -717,15 +751,21 @@ function drawScatterPlot(csv_path) {
             yAxis = d3.svg.axis().scale(yScale).orient("left");
             
         //setup width and color
+        var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
+               sizeMin = d3.min(data, function(d) { return d.num_poss; }),
+               sizeMean = d3.mean(data, function(d) { return d.num_poss; }),
+               colorMax = d3.max(data, function(d) { return d.clinch_rating; }),
+               colorMin = d3.min(data, function(d) { return d.clinch_rating; }),
+               colorMean = d3.mean(data, function(d) { return d.clinch_rating; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([4,6,10]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([5,8,11]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
-            colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["red", "orange", "green"]);
+            colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
             cMap = function(d){return colorScale(color(d))};
         console.log(d3.max(data, yValue))
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScale.domain([0, d3.max(data, xValue)+5]);
+        xScale.domain([d3.min(data, xValue) - 5, d3.max(data, xValue)+5]);
         yScale.domain([d3.min(data, yValue)-5, d3.max(data, yValue)+5]);
 
       function make_x_gridlines() {		
@@ -822,10 +862,10 @@ function drawScatterPlot(csv_path) {
         // draw dots
         svg.selectAll(".dot")
             .data(data)
-            .attr("id", function(d) {return d.key})
             .enter().append("circle")
+            .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
             .attr("stroke", "black")
-            .attr("class", "dot")
+            .attr("class", "dot hvr-box-shadow-inset")
             .attr("r", rMap)  
             .attr("cx", xMap)
             .attr("cy", yMap)
@@ -841,7 +881,8 @@ function drawScatterPlot(csv_path) {
             console.log(selectedPlayerMap);
             updateData();
             })
-            .on("mouseover", playerMouseOver)
+            .on("mouseover", circleMouseOver)
+            .on("mouseout", circleMouseOut)
             .on("click", mouseClickPlayerArc);
 
         $('svg .dot').tipsy({

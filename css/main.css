@@ -14,7 +14,7 @@
 }
 
 .selected {
-  stroke: #00ff9f;
+  stroke: #247ba0;
   stroke-width: 3px;
 }
 
@@ -25,4 +25,16 @@
 .disabled {
     opacity: 0.3;
     cursor: not-allowed;
+}
+
+tooltip {
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: #247ba0;	
+    border-radius: 8px;			
+    pointer-events: none;			
 }
