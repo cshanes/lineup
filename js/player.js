@@ -263,7 +263,7 @@ function arcMouseOut(d) {
     d3.select(boxId).classed('mouseout', true);
     d3.selectAll('td#new.num').html("--");
 }
-
+var svg;
 function circleMouseOver(d) {
     var name = d.nextPlayer;
     console.log(name);
@@ -285,7 +285,34 @@ function circleMouseOver(d) {
     var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', true);
     d3.select(boxId).classed('mouseout', false);
-        var circle = d3.select('circle#' + name + '.dot.hvr-box-shadow-inset')
+    var circle = d3.select(this);
+    svg.append("g")
+			.attr("class", "guide")
+		.append("line")
+			.attr("x1", circle.attr("cx"))
+			.attr("x2", circle.attr("cx"))
+			.attr("y1", +circle.attr("cy") + 26)
+			.attr("y2", 410)
+			.attr("transform", "translate(0,-20)")
+			.style("stroke", circle.style("fill"))
+			.transition().delay(20).duration(400).styleTween("opacity", 
+						function() { return d3.interpolate(0, .5); })
+		svg.append("g")
+			.attr("class", "guide")
+		.append("line")
+			.attr("x1", +circle.attr("cx") - 26)
+			.attr("x2", 30)
+			.attr("y1", circle.attr("cy"))
+			.attr("y2", circle.attr("cy"))
+			.attr("transform", "translate(20,0)")
+			.style("stroke", circle.style("fill"))
+			.transition().delay(20).duration(400).styleTween("opacity", 
+						function() { return d3.interpolate(0, .5); });
+		d3.selection.prototype.moveToFront = function() { 
+		  return this.each(function() { 
+			this.parentNode.appendChild(this); 
+		  });}
+
 }
 
 function circleMouseOut(d) {
@@ -296,6 +323,9 @@ function circleMouseOut(d) {
     var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', false);
     d3.select(boxId).classed('mouseout', true);
+    var circle = d3.select(this);
+		d3.selectAll(".guide").transition().duration(100).styleTween("opacity", 
+						function() { return d3.interpolate(.5, 0); }).remove();
 }
 
 function playerBoxMouseOver(d) {
@@ -731,8 +761,7 @@ function drawScatterPlot(csv_path) {
         xDiff = xWidth - yHeight;
     d3.select('#scatterplot').selectAll('*').remove();
     d3.select('div.tipsy').selectAll('*').remove();
-
-    var svg = d3.select('#scatterplot').append("svg")
+    svg = d3.select('#scatterplot').append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g");
@@ -761,15 +790,13 @@ function drawScatterPlot(csv_path) {
             yScale = d3.scale.linear().range([yWidth, yDiff]), // value -> display
             yMap = function(d) { return yScale(yValue(d))-30;}, // data -> display
             yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(8);
-            console.log("all the points", yAxis.scale().ticks(yAxis.ticks()[0]));
-
         
         //setup width and color
         var sizeMax = d3.max(data, function(d) { return d.num_poss; }),
                sizeMin = d3.min(data, function(d) { return d.num_poss; }),
                sizeMean = d3.mean(data, function(d) { return d.num_poss; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([5,8,11]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([8,11,14]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
@@ -823,13 +850,13 @@ function drawScatterPlot(csv_path) {
         svg.selectAll(".dot")
             .data(data)
             .enter().append("circle")
-            .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
-            .attr("stroke", "black")
-            .attr("class", "dot hvr-box-shadow-inset")
-            .attr("r", rMap)  
-            .attr("cx", xMap)
-            .attr("cy", yMap)
-            .style("fill", cMap)
+              .attr("id", function(d, i){return getNonSelectedPlayerName(d, i)})
+              .attr("stroke", "black")
+              .attr("class", "dot hvr-box-shadow-inset")
+              .attr("r", rMap)  
+              .attr("cx", xMap)
+              .attr("cy", yMap)
+              .style("fill", cMap)
             .on("click", function(d) {
             if (d.key in selectedPlayerMap) {
                 delete selectedPlayerMap[d.key];
