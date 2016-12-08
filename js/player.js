@@ -230,7 +230,18 @@ function mouseClickPlayerArc(d) {
     console.log(selectedPlayerMap);
     updateData();
 }
-
+d3.selection.prototype.moveToFront = function() { 
+		  return this.each(function() { 
+			this.parentNode.appendChild(this); 
+		  });}
+d3.selection.prototype.moveToBack = function() { 
+    return this.each(function() { 
+        var firstChild = this.parentNode.firstChild; 
+        if (firstChild) { 
+            this.parentNode.insertBefore(this, firstChild); 
+        } 
+    }); 
+};
 function arcMouseOver(d) {
     var name = d.nextPlayer;
     console.log(name);
@@ -248,7 +259,9 @@ function arcMouseOver(d) {
     d3.select(this).style("fill", "#6AADCA");
     nextLineup = lineupData[lineupKey];
     drawTable();
-    d3.select('circle#'+name+'.dot.hvr-box-shadow-inset').style("fill", "#6AADCA");
+    var circle = 'circle#'+name+'.dot.hvr-box-shadow-inset'
+    d3.select(circle).style("fill", "#6AADCA");
+    d3.select(circle).moveToFront();
     var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', true);
     d3.select(boxId).classed('mouseout', false);
@@ -257,7 +270,9 @@ function arcMouseOver(d) {
 function arcMouseOut(d) {
     var name = d.nextPlayer;
     d3.select(this).style("fill", barFill);
-    d3.select('circle#' + name + '.dot.hvr-box-shadow-inset').style("fill", cMap);
+    var circle = 'circle#' + name + '.dot.hvr-box-shadow-inset'
+    d3.select(circle).style("fill", cMap);
+    d3.select(circle).moveToBack();
     var boxId = '#' + name;
     d3.select(boxId).classed('mouseovered', false);
     d3.select(boxId).classed('mouseout', true);
@@ -286,6 +301,7 @@ function circleMouseOver(d) {
     d3.select(boxId).classed('mouseovered', true);
     d3.select(boxId).classed('mouseout', false);
     var circle = d3.select(this);
+    circle.moveToFront();
     svg.append("g")
 			.attr("class", "guide")
 		.append("line")
@@ -308,16 +324,13 @@ function circleMouseOver(d) {
 			.style("stroke", circle.style("fill"))
 			.transition().delay(20).duration(400).styleTween("opacity", 
 						function() { return d3.interpolate(0, .5); });
-		d3.selection.prototype.moveToFront = function() { 
-		  return this.each(function() { 
-			this.parentNode.appendChild(this); 
-		  });}
-
 }
 
 function circleMouseOut(d) {
     var name = d.nextPlayer;
     d3.select(this).style("fill", cMap);
+    circle = d3.select(this)
+    circle.moveToBack();
     d3.select('path#' + name).style("fill", barFill);
     d3.selectAll('td#new.num').html("--");
     var boxId = '#' + name;
@@ -796,7 +809,7 @@ function drawScatterPlot(csv_path) {
                sizeMin = d3.min(data, function(d) { return d.num_poss; }),
                sizeMean = d3.mean(data, function(d) { return d.num_poss; });
         var size = function(d){return d.num_poss;},
-            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([8,11,14]),
+            rscale = d3.scale.linear().domain([sizeMin, sizeMean, sizeMax]).range([7,10,13]),
             rMap = function(d){return rscale(size(d));};
         var color = function(d){return d.clinch_rating;},
             colorScale = d3.scale.linear().domain([colorMin, colorMean, colorMax]).range(["#d7191c", "yellow", "#1a9850"]);
