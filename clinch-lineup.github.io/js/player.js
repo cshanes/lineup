@@ -51,6 +51,7 @@ function updateData() {
         drawScatterPlot(filename);
         drawTable();
         updatePlayerSelectionBox(filename);
+        d3.selectAll('td#new.num').html("--");
     });
 
 }
@@ -351,6 +352,7 @@ function playerBoxMouseOut(d) {
     var name = d.key;
     d3.select('path#' + name).style("fill", barFill);
     d3.select('circle#' + name + '.dot.hvr-box-shadow-inset').style("fill", cMap);
+    d3.selectAll('td#new.num').html("--");
 }
 
 function drawPlayerSelectionBox(rawdata) {
@@ -394,6 +396,7 @@ function drawPlayerSelectionBox(rawdata) {
             }
             console.log(selectedPlayerMap);
             updateData();
+            d3.selectAll('td#new.num').html("--");
         })
         .on("mouseover", playerBoxMouseOver)
         .on("mouseout", playerBoxMouseOut)
